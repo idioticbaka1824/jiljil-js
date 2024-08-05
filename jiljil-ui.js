@@ -28,40 +28,13 @@
             this.bmp_charactor.src = "BITMAP/BMP_CHARACTOR.png";
             this.bmp_charactor.addEventListener("load", this.onImageLoad.bind(this));
 			
-			this.bgm1 = new Audio('WAVE/BGM1.wav');
+			
+			const bgm1_url = new URL('https://raadshaikh.github.io/jiljil-js/WAVE/BGM1.wav');
+			this.bgm1 = new Audio(bgm1_url);
+			this.bgm1.crossOrigin = "anonymous";
 			this.bgm1.loop = true;
 			this.bgm2 = new Audio('WAVE/BGM2.wav');
 			this.bgm2.loop = true;
-			
-			var contextClass = (window.AudioContext || 
-			  window.webkitAudioContext || 
-			  window.mozAudioContext || 
-			  window.oAudioContext || 
-			  window.msAudioContext);
-			if (contextClass) {
-			  // Web Audio API is available.
-			  var context = new contextClass();
-			} else {
-			  // Web Audio API is not available. Ask the user to use a supported browser.
-			  console.log('Web Audio API is not available.');
-			}
-			// Create the source.
-			var source = context.createBufferSource();
-			var request = new XMLHttpRequest();
-			request.open('GET', 'WAVE/BGM1.wav', true);
-			request.responseType = 'arraybuffer';
-
-			// Decode asynchronously
-			request.onload = function() {
-			  context.decodeAudioData(request.response, function(theBuffer) {
-				buffer = theBuffer;
-			  }, onError);
-			}
-			request.send();
-			
-			source.buffer = buffer;
-			source.connect(context.destination);
-			source.start(0);
 			
 			
         }
@@ -166,6 +139,22 @@
 					// this.bgm2.pause();
 					// this.bgm2.currentTime=0;
 					// this.bgm1.play();
+					if(!this.audioContext){
+						console.log('hi');
+						var contextClass = (window.AudioContext || 
+						  window.webkitAudioContext || 
+						  window.mozAudioContext || 
+						  window.oAudioContext || 
+						  window.msAudioContext);
+						if (contextClass) {
+						  this.audioContext = new contextClass();
+						} else {
+						  console.log('Web Audio API is not available. Use a supported browser.');
+						}
+						this.bgm1_node = this.audioContext.createMediaElementSource(this.bgm1);
+					}
+					this.bgm1_node.connect(this.audioContext.destination);
+					new Audio().srcObject = this.bgm1.node;
 					
 					this.ctx.drawImage(this.bmp_jiljil, 0, 85, 2, 2, this.game.playerCurPos.x-2/2, this.game.playerCurPos.y-2/2, 2, 2);
 					this.ctx.drawImage(this.bmp_jiljil, 0, 0, 16, 16, this.game.playerPos.x-16/2, this.game.playerPos.y-16/2, 16, 16);
