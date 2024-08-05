@@ -214,6 +214,12 @@
 						this.gameState = 'gameover';
 						this.previousGameState = 'gameover';
 					}
+					
+					// if(ekeys['p']){
+						// let ctx = new AudioContext();
+						// let source = ctx.createMediaElementSource(ui.bgm1);
+						// source.connect(ctx.destination);
+					// }
 					break;
 				
 				case 'gameover':
