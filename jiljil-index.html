@@ -1,0 +1,156 @@
+<html>
+
+<head>
+    <title>JiLJiL</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+    <style>
+        body {
+            background-color: #f0f0f0;
+        }
+
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            padding: 0
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+			min-width: 320px;
+			min-height: 240px;
+        }
+    }
+    </style>
+	<link rel="icon" href="BITMAP/1.ico"></link>
+</head>
+
+<body>
+            
+    <div id="canvas-container">
+        <canvas id="game-canvas"></canvas>
+    </div>
+
+	<script src="jiljil.js"></script>
+    <script src="jiljil-ui.js"></script>
+
+    <script>
+			window.scale = 1;
+			window.width = 320;
+			window.height = 240;
+			const fps = 32;
+			
+            const canvasContainer = document.getElementById("canvas-container");
+            const gameCanvas = document.getElementById("game-canvas");
+			gameCanvas.focus();
+            gameCanvas.width = scale*width;
+            gameCanvas.height = scale*height;
+			gameCanvas.oncontextmenu = function(e) { e.preventDefault(); e.stopPropagation(); } //disabling context menu on the canvas so that right-click can be used for other stuff
+            const ui = new GameUI(gameCanvas);
+			const game = new Game('b');
+			ui.setGame(game);
+			setInterval(game.update.bind(game), 1000/fps);
+
+			window.keysBeingPressed = {
+			'ArrowLeft': false,
+			'ArrowRight': false,
+			'ArrowUp': false,
+			'ArrowDown': false,
+			'Escape': false,
+			' ': false,
+			'f': false,
+			'g': false,
+			'k': false,
+			};
+			
+            document.addEventListener('keyup', (e) => {
+				keysBeingPressed[e.key] = false;
+			}, true);
+			
+            document.addEventListener('keydown', (e) => {
+				keysBeingPressed[e.key] = true;
+            }, true);
+			
+			
+			function getMousePosition(canvas, event) {
+				let rect = canvas.getBoundingClientRect();
+				let x = event.clientX - rect.left;
+				let y = event.clientY - rect.top;
+				return [x, y];
+			}
+			
+			/*
+			orgCanvas.addEventListener('mousedown', (e) => {
+                click_coords = getMousePosition(orgCanvas, e);
+				window.clickHandling(click_coords[0], click_coords[1], e=e);
+            }, true);
+            
+			var cursor_coords = [0,0];
+			
+			window.clickHandling = (x, y, e) => {
+				if(currentOrg==null || !currentOrg.isWaveformEditor) {
+					if(y>orgCanvas.height-48 && y<orgCanvas.height-24 && x>orgCanvas.width-192+3*48 && x<orgCanvas.width-192+4*48) {
+						if(currentOrg) currentOrg.pause();
+						alert(helpStrings.about);
+					}
+					if(y>orgCanvas.height-76 && y<orgCanvas.height-48 && x>orgCanvas.width-192+3*48 && x<orgCanvas.width-192+4*48) {
+						if(currentOrg) currentOrg.pause();
+						alert(helpStrings.help);
+					}
+					if(y>orgCanvas.height-24 && y<orgCanvas.height && x>orgCanvas.width-192+48 && x<orgCanvas.width-192+2*48) {
+						if(keyBeingPressed=='Control') {alert(helpStrings.newFile); keyBeingPressed=null;}
+						else {
+							document.getElementById('songs').disabled = true;
+							window.playOrg('dontPlay', false, true);
+						}
+					}
+					if(y>orgCanvas.height-24 && y<orgCanvas.height && x>orgCanvas.width-192+2*48 && x<orgCanvas.width-192+3*48) {
+						if(keyBeingPressed=='Control') {alert(helpStrings.loadFile); keyBeingPressed=null;}
+						else {
+							document.getElementById('fileElem').click();
+						}
+					}
+					if(y>orgCanvas.height-24 && y<orgCanvas.height && x>orgCanvas.width-192+3*48 && x<orgCanvas.width-192+4*48) {
+						if(keyBeingPressed=='Control') {alert(helpStrings.saveFile); keyBeingPressed=null;}
+						else if(e.button==0) currentOrg.saveFile();
+						else if(e.button==2) currentOrg.exportMIDI();
+					}
+					if(y>orgCanvas.height-72+16 && y<orgCanvas.height-72+16+36 && x>104 && x<104+68) {
+						window.isClickingFish=true;
+						ui.draw();
+					}
+				}
+			}
+			
+			orgCanvas.addEventListener('mousemove', (e) => {
+                cursor_coords = getMousePosition(orgCanvas, e);
+				if (currentOrg != null) {
+					if (!currentOrg.isWaveformEditor && cursor_coords[0]>orgCanvas.width-8 && cursor_coords[1]<orgCanvas.height-74 && currentOrg.isPlaying==false) window.nextMeas(true);
+					if (!currentOrg.isWaveformEditor && cursor_coords[0]<8 && cursor_coords[1]<orgCanvas.height-74 && currentOrg.isPlaying==false) window.backMeas(true);
+					if (isSelecting) currentOrg.selectionUpdate(cursor_coords[0]);
+					if (isDraggingHeadFoot) currentOrg.headFootUpdate(cursor_coords[0], cursor_coords[1], isDraggingHeadFoot);
+					if (isEditingSamples && currentOrg.isWaveformEditor && cursor_coords[0]>64 && cursor_coords[0]<64+512 && cursor_coords[1]>56 && cursor_coords[1]<56+200) currentOrg.editWaveSamples(cursor_coords[0], cursor_coords[1]);
+					if (isEditingSamples && currentOrg.isWaveformEditor && cursor_coords[0]>320 && cursor_coords[0]<320+256 && cursor_coords[1]>274 && cursor_coords[1]<274+128) currentOrg.editEnvelopeSamples(cursor_coords[0], cursor_coords[1]);
+				}
+			}, true);
+			
+			orgCanvas.addEventListener('mouseup', (e) => {
+				isSelecting = false;
+				isEditingSamples = false;
+				window.isClickingFish = false;
+				if(isDraggingHeadFoot) {
+					isDraggingHeadFoot = false;
+					currentOrg.archivesUpdate();
+				}
+				ui.draw();
+            }, true);
+			*/
+			
+    </script>
+</body>
+
+</html>
