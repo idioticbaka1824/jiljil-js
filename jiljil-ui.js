@@ -29,19 +29,60 @@
             this.bmp_charactor.addEventListener("load", this.onImageLoad.bind(this));
 			
 			
-			const bgm1_url = new URL('https://raadshaikh.github.io/jiljil-js/WAVE/BGM1.wav');
-			this.bgm1 = new Audio(bgm1_url);
-			// this.bgm1.crossOrigin = "anonymous";
-			this.bgm1_playing = false;
-			this.bgm1.loop = true;
-			this.bgm2 = new Audio('WAVE/BGM2.wav');
+			this.bgm1_url = new URL('https://raadshaikh.github.io/jiljil-js/WAVE/BGM1.wav');
+			this.bgm1 = new Audio(this.bgm1_url);
+			// this.bgm1 = document.createElement('audio');
+			// this.bgm1.src = bgm1_url;
 			this.bgm1.crossOrigin = "anonymous";
-			this.bgm2.loop = true;
+			this.bgm1_playing = false;
+			// this.bgm1.loop = true;
+			this.bgm2_url = new URL('https://raadshaikh.github.io/jiljil-js/WAVE/BGM2.wav');
+			this.bgm2 = new Audio(this.bgm2_url);
+			// this.bgm2 = new Audio('WAVE/BGM2.wav');
+			this.bgm2.crossOrigin = "anonymous";
+			this.bgm2_playing = false;
+			// this.bgm2.loop = true;
+			this.se = [];
+			for(let i=0; i<=11; i++){
+				this.se[i] = new Audio(new URL('https://raadshaikh.github.io/jiljil-js/WAVE/SE'+String(i+1).padStart(2,'0')+'.wav'))
+			}
 			
+			window.audioContext = new AudioContext();
 			
+			// this.bgm1_node = window.audioContext.createMediaElementSource(this.bgm1);
+			// this.bgm1_node.loop = true;
+			// this.bgm2_node = window.audioContext.createMediaElementSource(this.bgm2);
+			// this.bgm2_node.loop = true;
+			// this.bgm1_node.connect(window.audioContext.destination);
+			this.buffer = 0;
+			this.source = 0;
         }
-        
-        
+		
+        async loadAudio(val) {
+			  try {
+				const response = await fetch(val==1?this.bgm1_url:this.bgm2_url);
+				// Decode it
+				this.buffer = await window.audioContext.decodeAudioData(await response.arrayBuffer());
+			  } catch (err) {
+				console.error(`Unable to fetch the audio file. Error: ${err.message}`);
+			  }
+		}
+        async play_bgm(val){
+				await this.loadAudio(val);
+				this.source = window.audioContext.createBufferSource();
+				this.source.loop = true;
+				this.source.buffer = this.buffer;
+				this.source.connect(window.audioContext.destination);
+				this.source.start();
+		}
+		async stop_bgm(){
+			if(this.source){
+				this.bgm1_playing = false;
+				this.bgm2_playing = false;
+				this.source.stop();
+				}
+		}
+		
         onTouchStart(e) {
             this.touching = true;
             this.touchX = e.touches[0].pageX;
@@ -112,20 +153,7 @@
 			this.ctx.fillStyle = 'black';
 			this.ctx.fillRect(0, 0, width, height);
 			
-			if(this.game.gameState == 'playing' || this.game.gameState == 'gameover'){
-				for(let i=1; i<=14; i++){
-					this.ctx.drawImage(this.bmp_jiljil, 64, 64, 20, 20, i*20, 0, 20, 20);
-					this.ctx.drawImage(this.bmp_jiljil, 64, 64, 20, 20, i*20, 240-20, 20, 20);
-				}
-				this.ctx.drawImage(this.bmp_jiljil, 80, 16, 48, 8, 140, 223, 48, 8);
-				this.ctx.drawImage(this.bmp_jiljil, 80, 120, 48, 8, 225, 211, 48, 8);
-				this.ctx.drawImage(this.bmp_jiljil, 80, 120, 48, 8, 225, 20, 48, 8);
-				this.ctx.drawImage(this.bmp_jiljil, 80, 112, 18, 8, 207, 21, 18, 8);
-				this.drawNumber(275, 203, this.game.score, 3);
-				this.drawNumber(275, 20, this.game.highscore, 3);
-				
-				this.ctx.drawImage(this.bmp_jiljil, 0, 48, 64, 64, this.game.lemonPos.x-64/2, this.game.lemonPos.y-64/2, 64, 64);
-			}
+			
 			
 			switch(this.game.gameState) {
 				case 'loading':
@@ -133,49 +161,59 @@
 					break;
 					
 				case 'startscreen':
-					this.ctx.drawImage(this.bmp_jiljil, 88, 64, 36, 20, 124, 50, 36, 20);
-					this.ctx.drawImage(this.bmp_jiljil, 88, 64, 36, 20, 124+36, 50, 36, 20);
+					this.stop_bgm();
+					this.ctx.drawImage(this.bmp_jiljil, 88, 64, 36, 20, 124, 50, 36, 20); //'JiL'
+					this.ctx.drawImage(this.bmp_jiljil, 88, 64, 36, 20, 124+36, 50, 36, 20); //'JiL'
 					break;
 				
 				case 'playing':	
-					// this.bgm2.pause();
-					// this.bgm2.currentTime=0;
-					// this.bgm1.play();
-					
-					if(!this.audioContext){
-						this.audioContext = new AudioContext();
-					}
-					if(!this.bgm1_node){
-						this.bgm1_node = this.audioContext.createMediaElementSource(this.bgm1);
-						this.bgm1_node.loop=true;
-					}
 					if(!this.bgm1_playing){
-						this.bgm1_node.connect(this.audioContext.destination);
-						this.bgm1_playing=true;
+						this.stop_bgm();
+						this.play_bgm(1);
+						this.bgm1_playing = true;
 					}
 					
-					this.ctx.drawImage(this.bmp_jiljil, 0, 85, 2, 2, this.game.playerCurPos.x-2/2, this.game.playerCurPos.y-2/2, 2, 2);
-					this.ctx.drawImage(this.bmp_jiljil, 0, 0, 16, 16, this.game.playerPos.x-16/2, this.game.playerPos.y-16/2, 16, 16);
+					this.ctx.drawImage(this.bmp_jiljil, 0, 85, 2, 2, this.game.playerCurPos.x-2/2, this.game.playerCurPos.y-2/2, 2, 2); //dot that represents 'player cursor', see jiljil.js for details. comment out when finished
+					this.ctx.drawImage(this.bmp_jiljil, 0, 0, 16, 16, this.game.playerPos.x-16/2, this.game.playerPos.y-16/2, 16, 16); //worm head
 					break;
 				
 				case 'gameover':
-					// this.bgm1.pause();
-					// this.bgm1.currentTime=0;
-					// this.bgm2.play();
-					this.ctx.drawImage(this.bmp_jiljil, 64, 16, 16, 16, this.game.playerPos.x-16/2, this.game.playerPos.y-16/2, 16, 16);
-					this.ctx.drawImage(this.bmp_jiljil, 64, 36, 64, 12, 48, 48, 64, 12);					
+					if(!this.bgm2_playing){
+						this.stop_bgm();
+						this.play_bgm(2);
+						this.bgm2_playing = true;
+					}
+					
+					this.ctx.drawImage(this.bmp_jiljil, 64, 16, 16, 16, this.game.playerPos.x-16/2, this.game.playerPos.y-16/2, 16, 16); //crying worm
+					this.ctx.drawImage(this.bmp_jiljil, 64, 36, 64, 12, 48, 48, 64, 12); //'push space'
 					break;
 					
 				case 'escmenu':
 					// this.bgm1.pause();
 					// this.bgm2.pause();
-					this.ctx.drawImage(this.bmp_escape, 0, 0, 80, 24, 8, 8, 80, 24);
+					this.ctx.drawImage(this.bmp_escape, 0, 0, 80, 24, 8, 8, 80, 24); //pause screen
 					break;
 					
 				default:
 					break;
 			}
-
+			
+			if(this.game.gameState == 'playing' || this.game.gameState == 'gameover'){
+				for(let i=1; i<=14; i++){
+					this.ctx.drawImage(this.bmp_jiljil, 64, 64, 20, 20, i*20, 0, 20, 20); //ceiling
+					this.ctx.drawImage(this.bmp_jiljil, 64, 64, 20, 20, i*20, 240-20, 20, 20); //floor
+				}
+				this.ctx.drawImage(this.bmp_jiljil, 0, 48, 64, 64, this.game.lemonPos.x-64/2, this.game.lemonPos.y-64/2, 64, 64); //lemon
+				this.ctx.drawImage(this.bmp_jiljil, 63, 94, 24, 8, 20, 211, 24, 8); //'teema:'
+				this.ctx.drawImage(this.bmp_jiljil, 64, 84, 64, 8, 48, 211, 64, 8); //'shippo ga abunai'
+				this.ctx.drawImage(this.bmp_jiljil, 80, 16, 48, 8, 140, 223, 48, 8); //'esc->exit'
+				this.ctx.drawImage(this.bmp_jiljil, 80, 120, 48, 8, 225, 211, 48, 8); //'score'
+				this.ctx.drawImage(this.bmp_jiljil, 80, 120, 48, 8, 225, 20, 48, 8); //'score'
+				this.ctx.drawImage(this.bmp_jiljil, 80, 112, 18, 8, 207, 21, 18, 8); //'hi'
+				this.drawNumber(275, 203, this.game.score, 3); //score
+				this.drawNumber(275, 20, this.game.highscore, 3); //high score
+			}
+			if(this.game.gameState == 'gameover'){this.ctx.drawImage(this.bmp_jiljil, 64, 36, 64, 12, 48, 48, 64, 12);}
         }
     }
 

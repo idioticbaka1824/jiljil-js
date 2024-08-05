@@ -33,6 +33,8 @@
 			this.score = 0;
 			this.highscore = 0;
 			
+			this.justStartedPlaying = true;
+			
 			this.playerPos = {x:window.width/2, y:window.height-20-16/2};
 			this.playerVel = {x:0, y:0};
 			this.playerAcc = {x:0, y:0};
@@ -76,37 +78,51 @@
 					break;
 				
 				case 'startscreen':
+					this.justStartedPlaying = true;
 					break;
 				
 				case 'playing':
+					if(this.justStartedPlaying){
+						ui.se[6].play();
+						this.justStartedPlaying = false;
+					}
 					// console.log(this.playerPos, this.playerVel, this.playerAcc, this.keyHasBeenPressed);
 					
 					//collisions
 					
 					//player-wall
-					if((this.playerCurPos.x < 20) || (this.playerCurPos.x > window.width-20)){
-						this.playerCurPos.x = clamp(this.playerCurPos.x, 20, window.width-20);
-					}
-					if((this.playerCurPos.y < 20) || (this.playerCurPos.y > window.height-20)){
-						this.playerCurPos.y = clamp(this.playerCurPos.y, 20, window.height-20);
-					}
+					// if((this.playerCurPos.x < 20) || (this.playerCurPos.x > window.width-20)){
+						// this.playerCurPos.x = clamp(this.playerCurPos.x, 20, window.width-20);
+					// }
+					// if((this.playerCurPos.y < 20) || (this.playerCurPos.y > window.height-20)){
+						// this.playerCurPos.y = clamp(this.playerCurPos.y, 20, window.height-20);
+					// }
 					if((this.playerPos.x < 20+16/2 && this.playerVel.x<0) || (this.playerPos.x > window.width-20-16/2 && this.playerVel.x>0)){
-						this.playerVel.x *= -1;
+						this.playerVel.x *= -2;
+						this.playerVel.x += 2*(this.playerVel.x ? this.playerVel.x < 0 ? -1 : 1 : 0) //stuff in brackets is signum function. basically add a bit to the velocity so that if it's nearly zero, there should still be some bounce
 						this.playerPos.x = clamp(this.playerPos.x, 20+16/2, window.width-20-16/2);
+						this.playerCurPos.x = clamp(this.playerPos.x, 20+16/2, window.width-20-16/2);
+						ui.se[3].play();
 					}
 					if((this.playerPos.y < 20+16/2 && this.playerVel.y<0) || (this.playerPos.y > window.height-20-16/2 && this.playerVel.y>0)){
-						this.playerVel.y *= -1;
+						this.playerVel.y *= -2;
+						this.playerVel.y += 2*(this.playerVel.y ? this.playerVel.y < 0 ? -1 : 1 : 0)
 						this.playerPos.y = clamp(this.playerPos.y, 20+16/2, window.height-20-16/2);
+						this.playerCurPos.y = clamp(this.playerPos.y, 20+16/2, window.height-20-16/2);
+						ui.se[3].play();
 					}
 					
 					//lemon-wall
 					if((this.lemonPos.y < 20+48/2 && this.lemonVel.y<0) || (this.lemonPos.y > window.height-20-48/2 && this.lemonVel.y>0)){
 						this.lemonVel.y *= -1*this.corLW;
+						this.lemonVel.y += 0.1*(this.lemonVel.y ? this.lemonVel.y < 0 ? -1 : 1 : 0) //same as above, so the lemon never really stops
 						this.lemonPos.y = clamp(this.lemonPos.y, 20+48/2, window.height-20-48/2);
+						ui.se[4].play();
 					}
 					if((this.lemonPos.x < 20+48/2 && this.lemonVel.x<0) || (this.lemonPos.x > window.width-20-48/2 && this.lemonVel.x>0)){
 						this.lemonVel.x *= -1*this.corLW;
 						this.lemonPos.x = clamp(this.lemonPos.x, 20+48/2, window.width-20-48/2);
+						ui.se[4].play();
 					}
 					
 					//player-lemon
@@ -129,7 +145,10 @@
 						this.lemonVel.y = k2*headonV1*dy/r - v2.y;
 						this.playerPos.x = this.lemonPos.x-(48/2+16/2)*dx/r;
 						this.playerPos.y = this.lemonPos.y-(48/2+16/2)*dy/r;
+						this.playerCurPos.x = this.lemonPos.x-(48/2+18/2)*dx/r;
+						this.playerCurPos.y = this.lemonPos.y-(48/2+18/2)*dy/r;
 						this.score += 1;
+						ui.se[0].play();
 					}
 					
 					//old stuff
@@ -172,6 +191,7 @@
 					break;
 				
 				case 'gameover':
+					this.justStartedPlaying = true;
 					break;
 				
 				case 'escmenu':
@@ -211,6 +231,8 @@
 						this.keyHasBeenPressed.vertical = 1;
 					}
 					if(ekeys['k']){
+						ui.se[5].play(); //remember to move these lines to the actual 'pawprint hits worm' code
+						if(this.score > this.highscore){this.highscore = this.score;}
 						this.gameState = 'gameover';
 						this.previousGameState = 'gameover';
 					}
