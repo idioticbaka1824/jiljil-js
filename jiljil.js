@@ -44,6 +44,24 @@
 			this.playerCurVel = 3;
 			this.player_dt = 0.05;
 			this.player_w0 = 5;
+			this.playerSeg_dt = 0.05;
+			this.playerSeg_zeta = 0.5; //the segments are a bit underdamped
+			this.playerSeg_w0 = 8; //wonder if these parameters need to be unique to each segment
+			this.sparkle_dt = 0.05;
+			this.sparkle_w0 = 1;
+			this.playerSegSize = [13, 12, 11, 10, 9, 8, 16];
+			this.playerSegPos = [];
+			this.playerSegVel = [];
+			this.playerSegAcc = [];
+			for(let i=0; i<7; i++){
+				this.playerSegPos[i] = {x:window.width/2, y:window.height-20-16/2};
+				this.playerSegVel[i] = {x:0, y:0};
+				this.playerSegAcc[i] = {x:0, y:0};
+			}
+			this.sparklePos = {x:window.width/2, y:window.height-20-16/2};
+			this.sparkleVel = {x:0, y:0};
+			this.sparkleAcc = {x:0, y:0};
+			this.sparkleFrame = 0;
 			
 			this.lemonPos = {x:72+48/2, y:16+48/2};
 			this.lemonVel = {x:0.5, y:0};
@@ -60,12 +78,23 @@
 		resetStuff(){
 			this.score = 0;
 			this.playerPos = {x:window.width/2, y:window.height-20-16/2};
-			this.playerCurPos = {x:window.width/2, y:window.height-20-16/2};
+			this.playerCurPos = {x:window.width/2, y:20+16/2+28};
 			this.playerVel = {x:0, y:0};
 			this.playerAcc = {x:0, y:0};
+			for(let i=0; i<7; i++){
+				this.playerSegPos[i] = {x:window.width/2, y:window.height-20-16/2};
+				this.playerSegVel[i] = {x:0, y:0};
+				this.playerSegAcc[i] = {x:0, y:0};
+			}
+			this.sparklePos = {x:window.width/2, y:window.height-20-16/2};
+			this.sparkleVel = {x:0, y:0};
+			this.sparkleAcc = {x:0, y:0};
 			this.lemonPos = {x:72+48/2, y:16+48/2};
 			this.lemonVel = {x:0.5, y:0};
 			this.lemonAcc = {x:0, y:0};
+			this.paw0Pos = {x:146, y:211};
+			this.paw1Pos = {x:186, y:216};
+			ui.frameCount = 0;
 		}
 		
         update() {
@@ -179,6 +208,32 @@
 					this.playerAcc.y = -(this.player_w0**2)*(this.playerPos.y - this.playerCurPos.y) + -2*this.player_w0*(this.playerVel.y);
 					this.playerVel.y += this.player_dt*this.playerAcc.y;
 					this.playerPos.y += this.player_dt*this.playerVel.y;
+					
+					this.playerSegAcc[0].x = -(this.playerSeg_w0**2)*(this.playerSegPos[0].x - this.playerPos.x) + -2*this.playerSeg_zeta*this.playerSeg_w0*(this.playerSegVel[0].x);
+					for(let i=1; i<7; i++){
+						this.playerSegAcc[i].x = -(this.playerSeg_w0**2)*(this.playerSegPos[i].x - this.playerSegPos[i-1].x) + -2*this.playerSeg_zeta*this.playerSeg_w0*(this.playerSegVel[i].x);
+					}
+					for(let i=0; i<7; i++){
+					this.playerSegVel[i].x += this.playerSeg_dt*this.playerSegAcc[i].x;
+					this.playerSegPos[i].x += this.playerSeg_dt*this.playerSegVel[i].x;
+					}
+					this.playerSegAcc[0].y = -(this.playerSeg_w0**2)*(this.playerSegPos[0].y - this.playerPos.y) + -2*this.playerSeg_zeta*this.playerSeg_w0*(this.playerSegVel[0].y);
+					for(let i=1; i<7; i++){
+						this.playerSegAcc[i].y = -(this.playerSeg_w0**2)*(this.playerSegPos[i].y - this.playerSegPos[i-1].y) + -2*this.playerSeg_zeta*this.playerSeg_w0*(this.playerSegVel[i].y);
+					}
+					for(let i=0; i<7; i++){
+					this.playerSegVel[i].y += this.playerSeg_dt*this.playerSegAcc[i].y;
+					this.playerSegPos[i].y += this.playerSeg_dt*this.playerSegVel[i].y;
+					}
+					
+					this.sparkleAcc.x = -(this.sparkle_w0**2)*(this.sparklePos.x - this.playerSegPos[6].x) + -2*this.sparkle_w0*(this.sparkleVel.x);
+					this.sparkleVel.x += this.sparkle_dt*this.sparkleAcc.x;
+					this.sparklePos.x += this.sparkle_dt*this.sparkleVel.x;
+					this.sparkleAcc.y = -(this.sparkle_w0**2)*(this.sparklePos.y - this.playerSegPos[6].y) + -2*this.sparkle_w0*(this.sparkleVel.y);
+					this.sparkleVel.y += this.sparkle_dt*this.sparkleAcc.y;
+					this.sparklePos.y += this.sparkle_dt*this.sparkleVel.y;
+					this.sparkleFrame += 1;
+					this.sparkleFrame %= 4;
 					
 					this.keyHasBeenPressed = {horizontal:0, vertical:0};
 					

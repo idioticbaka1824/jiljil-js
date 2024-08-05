@@ -29,31 +29,23 @@
             this.bmp_charactor.addEventListener("load", this.onImageLoad.bind(this));
 			
 			
+			this.frameCount = 0; //
+			
+			
 			this.bgm1_url = new URL('https://raadshaikh.github.io/jiljil-js/WAVE/BGM1.wav');
 			this.bgm1 = new Audio(this.bgm1_url);
-			// this.bgm1 = document.createElement('audio');
-			// this.bgm1.src = bgm1_url;
 			this.bgm1.crossOrigin = "anonymous";
 			this.bgm1_playing = false;
-			// this.bgm1.loop = true;
 			this.bgm2_url = new URL('https://raadshaikh.github.io/jiljil-js/WAVE/BGM2.wav');
 			this.bgm2 = new Audio(this.bgm2_url);
-			// this.bgm2 = new Audio('WAVE/BGM2.wav');
 			this.bgm2.crossOrigin = "anonymous";
 			this.bgm2_playing = false;
-			// this.bgm2.loop = true;
 			this.se = [];
 			for(let i=0; i<=11; i++){
 				this.se[i] = new Audio(new URL('https://raadshaikh.github.io/jiljil-js/WAVE/SE'+String(i+1).padStart(2,'0')+'.wav'))
 			}
 			
 			window.audioContext = new AudioContext();
-			
-			// this.bgm1_node = window.audioContext.createMediaElementSource(this.bgm1);
-			// this.bgm1_node.loop = true;
-			// this.bgm2_node = window.audioContext.createMediaElementSource(this.bgm2);
-			// this.bgm2_node.loop = true;
-			// this.bgm1_node.connect(window.audioContext.destination);
 			this.buffer = 0;
 			this.source = 0;
         }
@@ -162,8 +154,25 @@
 					
 				case 'startscreen':
 					this.stop_bgm();
-					this.ctx.drawImage(this.bmp_jiljil, 88, 64, 36, 20, 124, 50, 36, 20); //'JiL'
-					this.ctx.drawImage(this.bmp_jiljil, 88, 64, 36, 20, 124+36, 50, 36, 20); //'JiL'
+					if(this.frameCount==28){this.se[7].play();}
+					if(this.frameCount>60){
+						this.ctx.drawImage(this.bmp_jiljil, 88, 64, 36, 20, 124, 50, 36, 20); //'JiL'
+						this.ctx.drawImage(this.bmp_jiljil, 88, 64, 36, 20, 124+36, 50, 36, 20); //'JiL'
+					}
+					if(this.frameCount==60){this.se[8].play();}
+					if(this.frameCount>92){
+						this.ctx.drawImage(this.bmp_jiljil, 80, 24, 48, 8, 137, 119, 48, 8); //'1997-10-xx'
+					}
+					if(this.frameCount==92){this.se[9].play();}
+					if(this.frameCount>128){
+						this.ctx.drawImage(this.bmp_jiljil, 64, 102, 56, 10, 132, 139, 56, 10); //'Tortoiseshell'
+					}
+					if(this.frameCount==128){this.se[10].play();}
+					if(this.frameCount>172){
+						this.ctx.drawImage(this.bmp_jiljil, 64, 36, 64, 12, 130, 164, 64, 12); //'Push Space'
+					}
+					if(this.frameCount==172){this.se[11].play();}
+					this.frameCount += 1;
 					break;
 				
 				case 'playing':	
@@ -173,8 +182,8 @@
 						this.bgm1_playing = true;
 					}
 					
-					this.ctx.drawImage(this.bmp_jiljil, 0, 85, 2, 2, this.game.playerCurPos.x-2/2, this.game.playerCurPos.y-2/2, 2, 2); //dot that represents 'player cursor', see jiljil.js for details. comment out when finished
-					this.ctx.drawImage(this.bmp_jiljil, 0, 0, 16, 16, this.game.playerPos.x-16/2, this.game.playerPos.y-16/2, 16, 16); //worm head
+					// this.ctx.drawImage(this.bmp_jiljil, 0, 85, 2, 2, this.game.playerCurPos.x-2/2, this.game.playerCurPos.y-2/2, 2, 2); //dot that represents 'player cursor', see jiljil.js for details. comment out when finished
+					
 					break;
 				
 				case 'gameover':
@@ -184,14 +193,13 @@
 						this.bgm2_playing = true;
 					}
 					
-					this.ctx.drawImage(this.bmp_jiljil, 64, 16, 16, 16, this.game.playerPos.x-16/2, this.game.playerPos.y-16/2, 16, 16); //crying worm
 					this.ctx.drawImage(this.bmp_jiljil, 64, 36, 64, 12, 48, 48, 64, 12); //'push space'
 					break;
 					
 				case 'escmenu':
 					// this.bgm1.pause();
 					// this.bgm2.pause();
-					this.ctx.drawImage(this.bmp_escape, 0, 0, 80, 24, 8, 8, 80, 24); //pause screen
+					this.ctx.drawImage(this.bmp_escape, 0, 0, 80, 16, 8, 8, 80, 16); //pause screen
 					break;
 					
 				default:
@@ -204,6 +212,15 @@
 					this.ctx.drawImage(this.bmp_jiljil, 64, 64, 20, 20, i*20, 240-20, 20, 20); //floor
 				}
 				this.ctx.drawImage(this.bmp_jiljil, 0, 48, 64, 64, this.game.lemonPos.x-64/2, this.game.lemonPos.y-64/2, 64, 64); //lemon
+				for(let i=6; i>=0; i--){ //worm segments
+						this.ctx.drawImage(this.bmp_jiljil, 16*(i+1), 0, 16, 16, this.game.playerSegPos[i].x-16/2, this.game.playerSegPos[i].y-16/2, 16, 16);
+				}
+				this.ctx.drawImage(this.bmp_jiljil, 64*(this.game.gameState=='gameover'), 16*(this.game.gameState=='gameover'), 16, 16, this.game.playerPos.x-16/2, this.game.playerPos.y-16/2, 16, 16); //worm head (crying or not depending on gameover)
+				this.ctx.drawImage(this.bmp_jiljil, 0, 16, 32, 32, this.game.paw0Pos.x-32/2, this.game.paw0Pos.y-32/2, 32, 32); //pawprints
+				this.ctx.drawImage(this.bmp_jiljil, 32, 16, 32, 32, this.game.paw1Pos.x-32/2, this.game.paw1Pos.y-32/2, 32, 32); //pawprints
+				if(this.game.gameState=='playing'){//sparkle
+					this.ctx.drawImage(this.bmp_jiljil, 64+16*(this.game.sparkleFrame), 48, 16, 16, this.game.sparklePos.x-16/2, this.game.sparklePos.y-16/2, 16, 16);
+				}
 				this.ctx.drawImage(this.bmp_jiljil, 63, 94, 24, 8, 20, 211, 24, 8); //'teema:'
 				this.ctx.drawImage(this.bmp_jiljil, 64, 84, 64, 8, 48, 211, 64, 8); //'shippo ga abunai'
 				this.ctx.drawImage(this.bmp_jiljil, 80, 16, 48, 8, 140, 223, 48, 8); //'esc->exit'
