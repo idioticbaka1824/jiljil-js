@@ -31,7 +31,7 @@
 	
     class Game {
         constructor(data=null) {
-			this.gameState = 'startscreen'; //loading, startscreen, playing, escmenu, gameover
+			this.gameState = 'loading'; //loading, startscreen, playing, escmenu, gameover
 			this.previousGameState = 'startscreen';
 			this.keyHasBeenPressed = {horizontal:0, vertical:0};
 			
@@ -306,6 +306,12 @@
 				}
 			}
 			switch(this.gameState){
+				case 'loading':
+					if(ekeys[' ']){
+						ekeys[' ']=false;
+						this.gameState = 'startscreen';
+					}
+					break;
 				case 'startscreen':
 					if(ekeys[' ']){
 						this.resetStuff();

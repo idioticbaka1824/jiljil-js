@@ -131,6 +131,12 @@
 					this.ctx.drawImage(this.bmp_jiljil, (str.charCodeAt(i) - 0x30) * 8, 112, 8, 16, x - 8*(str.length-i), y, 8, 16);
 				}
         }
+		
+		drawString(x, y, str){
+			for(let i=0; i<str.length; i++){
+				this.ctx.drawImage(this.bmp_charactor, 8*((str.charCodeAt(i)-0x20)%10), 8*~~((str.charCodeAt(i)-0x20)/10), 8, 8, x+8*i, y, 8, 8);
+			}
+		}
 
         onUpdate() {
             if (this.requested) return;
@@ -149,7 +155,8 @@
 			
 			switch(this.game.gameState) {
 				case 'loading':
-					// code block
+					this.drawString(118,window.height/2-4,'...LOADED!');
+					this.ctx.drawImage(this.bmp_jiljil, 64, 36, 64, 12, 130, 164, 64, 12); //'Push Space'
 					break;
 					
 				case 'startscreen':
