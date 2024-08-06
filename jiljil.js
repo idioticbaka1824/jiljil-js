@@ -46,12 +46,13 @@
 			this.playerMaxVel = 2;
 			this.playerMaxAcc = 1;
 			this.playerMass = 1;
+			this.playerCurPos = {x:window.width/2, y:window.height-20-16/2};
 			this.playerCurVel = 3;
 			this.player_dt = 0.05;
 			this.player_w0 = 5;
 			this.playerSeg_dt = 0.05;
 			this.playerSeg_zeta = 0.5; //the segments are a bit underdamped
-			this.playerSeg_w0 = 8; //wonder if these parameters need to be unique to each segment
+			this.playerSeg_w0 = 6; //wonder if these parameters need to be unique to each segment
 			this.sparkle_dt = 0.05;
 			this.sparkle_w0 = 1;
 			this.playerSegSize = [13, 12, 11, 10, 9, 8, 16];
@@ -71,12 +72,12 @@
 			this.lemonPos = {x:72+48/2, y:16+48/2};
 			this.lemonVel = {x:0.5, y:0};
 			this.lemonAcc = {x:0, y:0};
-			this.lemonMass = 20;
+			this.lemonMass = 30;
 			
 			this.paw0Pos = {x:146, y:211};
 			this.paw1Pos = {x:186, y:216};
 			this.pawPeriod = 32; //in frames
-			this.respiteFrames = 32;
+			this.respiteFrames = 64;
 			
 			this.friction = 0.05; //applies to player
 			this.gravity = 0.1; //applies to lemon
@@ -87,7 +88,7 @@
 		resetStuff(){
 			this.score = 0;
 			this.playerPos = {x:window.width/2, y:window.height-20-16/2};
-			this.playerCurPos = {x:window.width/2, y:20+16/2+28};
+			this.playerCurPos = {x:window.width/2, y:window.height-20-16/2};
 			this.playerVel = {x:0, y:0};
 			this.playerAcc = {x:0, y:0};
 			for(let i=0; i<7; i++){
@@ -125,6 +126,11 @@
 						this.justStartedPlaying = false;
 					}
 					// console.log(this.playerPos, this.playerVel, this.playerAcc, this.keyHasBeenPressed);
+					
+					//initial upward movement
+					if(ui.frameCount<this.respiteFrames && this.playerCurPos.y>20+16/2+28){
+						this.playerCurPos.y -= this.playerCurVel;
+					}
 					
 					//collisions
 					

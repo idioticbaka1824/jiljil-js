@@ -134,7 +134,7 @@
 		
 		drawString(x, y, str){
 			for(let i=0; i<str.length; i++){
-				this.ctx.drawImage(this.bmp_charactor, 8*((str.charCodeAt(i)-0x20)%10), 8*~~((str.charCodeAt(i)-0x20)/10), 8, 8, x+8*i, y, 8, 8);
+				this.ctx.drawImage(this.bmp_charactor, 8*((str.charCodeAt(i)-0x20)%10), 8*~~((str.charCodeAt(i)-0x20)/10), 8, 8, x+8*i, y, 8, 8); //~~ is shortcut for floor function somehow
 			}
 		}
 
@@ -189,7 +189,7 @@
 						this.bgm1_playing = true;
 					}
 					
-					// this.ctx.drawImage(this.bmp_jiljil, 0, 85, 2, 2, this.game.playerCurPos.x-2/2, this.game.playerCurPos.y-2/2, 2, 2); //dot that represents 'player cursor', see jiljil.js for details. comment out when finished
+					this.ctx.drawImage(this.bmp_jiljil, 0, 85, 2, 2, this.game.playerCurPos.x-2/2, this.game.playerCurPos.y-2/2, 2, 2); //dot that represents 'player cursor', see jiljil.js for details. comment out when finished
 					
 					this.frameCount += 1;
 					break;
