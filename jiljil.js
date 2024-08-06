@@ -1,5 +1,10 @@
 (() => {
 	
+	//mod function
+	function abs(x){
+		return x>0 ? x : -1*x;
+	}
+	
 	//utility function to force a number to within an allowed interval
 	function clamp(number, min, max) {
 		return Math.max(min, Math.min(number, max));
@@ -68,6 +73,10 @@
 			this.lemonAcc = {x:0, y:0};
 			this.lemonMass = 20;
 			
+			this.paw0Pos = {x:146, y:211};
+			this.paw1Pos = {x:186, y:216};
+			this.pawPeriod = 32; //in frames
+			this.respiteFrames = 32;
 			
 			this.friction = 0.05; //applies to player
 			this.gravity = 0.1; //applies to lemon
@@ -118,6 +127,16 @@
 					// console.log(this.playerPos, this.playerVel, this.playerAcc, this.keyHasBeenPressed);
 					
 					//collisions
+					
+					//playerTail-pawPrint
+					if(ui.frameCount>this.respiteFrames){
+						if((abs(this.playerSegPos[6].x-this.paw0Pos.x)<32/2 && abs(this.playerSegPos[6].y-this.paw0Pos.y)<32/2) || (abs(this.playerSegPos[6].x-this.paw1Pos.x)<32/2 && abs(this.playerSegPos[6].y-this.paw1Pos.y)<32/2)){
+							ui.se[5].play();
+							if(this.score > this.highscore){this.highscore = this.score;}
+							this.gameState = 'gameover';
+							this.previousGameState = 'gameover';
+						}
+					}
 					
 					//player-wall
 					// if((this.playerCurPos.x < 20) || (this.playerCurPos.x > window.width-20)){
@@ -243,6 +262,28 @@
 					this.lemonVel.y += this.gravity; //in computers, +y is downward
 					this.lemonPos.y += this.lemonVel.y;
 					
+					//pawprint movement
+					if(ui.frameCount>this.respiteFrames){//they're inactive for a bit at the beginning
+						if(ui.frameCount % this.pawPeriod == 0){
+					// console.log(ui.frameCount);
+							switch((ui.frameCount/this.pawPeriod)%4){
+								case 0:
+									this.paw0Pos = {x:window.width*2, y:window.height*2}; //move it off-screen so it 'disappears'
+									break;
+								case 1:
+									this.paw0Pos = {x:0, y:0};
+									break;
+								case 2:
+									this.paw1Pos = {x:window.width*2, y:window.height*2};
+									break;
+								case 3:
+									this.paw1Pos = {x:0, y:0};
+									break;
+								default:
+									break;
+							}
+						}
+					}
 					break;
 				
 				case 'gameover':
@@ -259,6 +300,7 @@
 		keyHandling(ekeys) {
 			if(ekeys['Escape']){
 				if(this.gameState != 'escmenu'){
+					window.audioContext.suspend();
 					this.gameState = 'escmenu';
 					ekeys['Escape'] = false;
 				}
@@ -267,6 +309,7 @@
 				case 'startscreen':
 					if(ekeys[' ']){
 						this.resetStuff();
+						window.audioContext.resume();
 						this.gameState = 'playing';
 						this.previousGameState = 'playing';
 					}
@@ -292,11 +335,6 @@
 						this.previousGameState = 'gameover';
 					}
 					
-					// if(ekeys['p']){
-						// let ctx = new AudioContext();
-						// let source = ctx.createMediaElementSource(ui.bgm1);
-						// source.connect(ctx.destination);
-					// }
 					break;
 				
 				case 'gameover':
@@ -308,17 +346,14 @@
 					break;
 				
 				case 'escmenu':
-					if(ekeys['f']){ //temporary. change to F1 later
+					if(ekeys['f']){
+						window.audioContext.resume();
 						this.gameState = this.previousGameState;
 					}
-					if(ekeys['g']){ //temporary. change to F2 later
+					if(ekeys['g']){
+						ui.frameCount = 0;
 						this.gameState = 'startscreen';
 						this.previousGameState = 'startscreen';
-					}
-					if(ekeys['Escape']){ //can't really close the browser window, so replicate 'reset' behaviour
-						this.gameState = 'startscreen';
-						this.previousGameState = 'startscreen';
-						ekeys['Escape'] = false;
 					}
 					break;
 			}
