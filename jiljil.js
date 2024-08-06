@@ -76,7 +76,7 @@
 			
 			this.paw0Pos = {x:146, y:211};
 			this.paw1Pos = {x:186, y:216};
-			this.pawPeriod = 32; //in frames
+			this.pawPeriod = 16; //in frames
 			this.respiteFrames = 64;
 			
 			this.friction = 0.05; //applies to player
@@ -97,6 +97,7 @@
 				this.playerSegAcc[i] = {x:0, y:0};
 			}
 			this.sparklePos = {x:window.width/2, y:window.height-20-16/2};
+			this.sparklePosPrev = {x:window.width/2, y:window.height-20-16/2};
 			this.sparkleVel = {x:0, y:0};
 			this.sparkleAcc = {x:0, y:0};
 			this.lemonPos = {x:72+48/2, y:16+48/2};
@@ -212,9 +213,6 @@
 						// this.playerPos.x = clamp(this.playerPos.x, 20+16/2, this.lemonPos.x-48/2);
 					// }
 					
-					//player-pawprint
-					//put code here
-					
 					
 					//player input
 						//old stuff
@@ -271,19 +269,22 @@
 					//pawprint movement
 					if(ui.frameCount>this.respiteFrames){//they're inactive for a bit at the beginning
 						if(ui.frameCount % this.pawPeriod == 0){
-					// console.log(ui.frameCount);
 							switch((ui.frameCount/this.pawPeriod)%4){
 								case 0:
 									this.paw0Pos = {x:window.width*2, y:window.height*2}; //move it off-screen so it 'disappears'
 									break;
 								case 1:
-									this.paw0Pos = {x:0, y:0};
+									this.paw0Pos.x = this.sparklePos.x;
+									this.paw0Pos.y = this.sparklePos.y;
 									break;
 								case 2:
+									this.sparklePosPrev.x = this.sparklePos.x;
+									this.sparklePosPrev.y = this.sparklePos.y;
 									this.paw1Pos = {x:window.width*2, y:window.height*2};
 									break;
 								case 3:
-									this.paw1Pos = {x:0, y:0};
+									this.paw1Pos.x = this.sparklePosPrev.x;
+									this.paw1Pos.y = this.sparklePosPrev.y;
 									break;
 								default:
 									break;
@@ -328,17 +329,19 @@
 					break;
 				
 				case 'playing':
-					if(ekeys['ArrowLeft']){
-						this.keyHasBeenPressed.horizontal = -1;
-					}
-					if(ekeys["ArrowRight"]){
-						this.keyHasBeenPressed.horizontal = 1;
-					}
-					if(ekeys["ArrowUp"]){
-						this.keyHasBeenPressed.vertical = -1;
-					}
-					if(ekeys["ArrowDown"]){
-						this.keyHasBeenPressed.vertical = 1;
+					if(ui.frameCount>this.respiteFrames/2){
+						if(ekeys['ArrowLeft']){
+							this.keyHasBeenPressed.horizontal = -1;
+						}
+						if(ekeys["ArrowRight"]){
+							this.keyHasBeenPressed.horizontal = 1;
+						}
+						if(ekeys["ArrowUp"]){
+							this.keyHasBeenPressed.vertical = -1;
+						}
+						if(ekeys["ArrowDown"]){
+							this.keyHasBeenPressed.vertical = 1;
+						}
 					}
 					if(ekeys['k']){
 						ui.se[5].play(); //remember to move these lines to the actual 'pawprint hits worm' code
