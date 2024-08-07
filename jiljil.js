@@ -405,6 +405,7 @@
 				
 				case 'escmenu':
 					if(ekeys['f']){
+						// ui.drawString(104,28,'F', 5);
 						window.audioContext.resume();
 						this.gameState = this.previousGameState;
 					}

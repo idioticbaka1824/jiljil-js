@@ -28,6 +28,10 @@
 				this.ctx.scale(window.scale, window.scale);
 				this.ctx.imageSmoothingEnabled = false;
 				
+				this.bmp_touchUI = new Image();
+				this.bmp_touchUI.src = "BITMAP/BMP_TOUCH.png";
+				this.bmp_touchUI.addEventListener("load", this.onImageLoad.bind(this));
+				
 				this.canvas2.addEventListener('touchstart', this.onTouchStart.bind(this));
                 this.canvas2.addEventListener('touchmove', this.onTouchMove.bind(this));
                 this.canvas2.addEventListener('touchend', this.onTouchEnd.bind(this));
@@ -45,9 +49,6 @@
             this.bmp_charactor = new Image();
             this.bmp_charactor.src = "BITMAP/BMP_CHARACTOR.png";
             this.bmp_charactor.addEventListener("load", this.onImageLoad.bind(this));
-            this.bmp_touchUI = new Image();
-            this.bmp_touchUI.src = "BITMAP/eg3.png";
-            this.bmp_touchUI.addEventListener("load", this.onImageLoad.bind(this));
 			
 			this.frameCount = 0;
 			
@@ -101,7 +102,6 @@
 			var x = this.touchX - window.width/2;
 			var y = -this.touchY + window.height/2;
 			var r = dist2(x,y);
-			console.log(e.touches[0].pageX, e.touches[0].pageY);
 			window.keysBeingPressed[' '] = (r<40);
 			window.keysBeingPressed['Escape'] = (this.touchX>32 && this.touchX<32+32 && this.touchY>8 && this.touchY<8+32);
 			window.keysBeingPressed['f'] = (e.touches[0].pageX>80 && e.touches[0].pageX<160 && e.touches[0].pageY<100);
@@ -118,10 +118,13 @@
 				var y = -this.touchY + window.height/2;
 				var r = dist2(x,y);
 				var theta = Math.atan2(y,x);
-				window.keysBeingPressed['ArrowRight'] = (abs(theta-0)<2*Math.PI/8);
-				window.keysBeingPressed['ArrowUp'] = (abs(theta-Math.PI/2)<2*Math.PI/8);
-				window.keysBeingPressed['ArrowLeft'] = ((abs(theta-Math.PI)<2*Math.PI/8) || (abs(theta - -Math.PI)<2*Math.PI/8)); //branch cut at \pm\pi
-				window.keysBeingPressed['ArrowDown'] = (abs(theta - -Math.PI/2)<2*Math.PI/8);
+				console.log(theta*180/Math.PI);
+				// console.log(e.touches[0].pageX, e.touches[0].pageY);
+				// console.log(this.touchX, this.touchY);
+				window.keysBeingPressed['ArrowRight'] = (abs(theta-0)<2*Math.PI/4);
+				window.keysBeingPressed['ArrowUp'] = (abs(theta-Math.PI/2)<2*Math.PI/4);
+				window.keysBeingPressed['ArrowLeft'] = ((abs(theta-Math.PI)<2*Math.PI/4) || (abs(theta - -Math.PI)<2*Math.PI/4)); //branch cut at \pm\pi
+				window.keysBeingPressed['ArrowDown'] = (abs(theta - -Math.PI/2)<2*Math.PI/4);
 				// console.log(theta, window.keysBeingPressed);
             }
         }
@@ -145,7 +148,7 @@
         
 
         onImageLoad() {
-            if (this.bmp_jiljil.complete && this.bmp_escape.complete && this.bmp_charactor.complete && this.bmp_touchUI.complete) {
+            if (this.bmp_jiljil.complete && this.bmp_escape.complete && this.bmp_charactor.complete && (!('ontouchstart' in window) || (('ontouchstart' in window)&&this.bmp_touchUI.complete))) {
                 this.onUpdate();
             }
         }
@@ -204,7 +207,10 @@
 					this.ctx2.drawImage(this.bmp_jiljil, 64, 64, 20, 20, 0, i*20, 20, 20); //left wall
 					this.ctx2.drawImage(this.bmp_jiljil, 64, 64, 20, 20, 320-20, i*20, 20, 20); //left wall
 				}
-				this.ctx2.drawImage(this.bmp_touchUI, 0, 0, 320, 240, 0, 0, 320, 240);
+				// this.ctx2.drawImage(this.bmp_touchUI, 0, 0, 320, 240, 0, 0, 320, 240);
+				this.ctx2.drawImage(this.bmp_touchUI, 0, 0, 32, 32, 32, 8, 32, 32);
+				this.ctx2.drawImage(this.bmp_touchUI, 32, 0, 56, 56, 130, 92, 56, 56);
+				this.ctx2.drawImage(this.bmp_touchUI, 88, 0, 196, 196, 60, 20, 196, 196);
 					
 			}
 			
