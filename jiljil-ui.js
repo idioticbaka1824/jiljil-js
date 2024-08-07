@@ -133,8 +133,12 @@
         }
 		
 		drawString(x, y, str){
+			let newlines = [0];
 			for(let i=0; i<str.length; i++){
-				this.ctx.drawImage(this.bmp_charactor, 8*((str.charCodeAt(i)-0x20)%10), 8*~~((str.charCodeAt(i)-0x20)/10), 8, 8, x+8*i, y, 8, 8); //~~ is shortcut for floor function somehow
+				if(str[i]=='\n'){newlines.push(i);}
+				if(str.charCodeAt(i)>=0x20){
+					this.ctx.drawImage(this.bmp_charactor, 8*((str.charCodeAt(i)-0x20)%10), 8*~~((str.charCodeAt(i)-0x20)/10), 8, 8, x+6*(i-newlines[newlines.length-1]-(newlines.length>1)), y+8*(newlines.length-1), 8, 8); //~~ is shortcut for floor function somehow
+				}
 			}
 		}
 
@@ -155,7 +159,7 @@
 			
 			switch(this.game.gameState) {
 				case 'loading':
-					this.drawString(118,window.height/2-4,'...LOADED!');
+					this.drawString(130,window.height/2-4,'...LOADED!');
 					this.ctx.drawImage(this.bmp_jiljil, 64, 36, 64, 12, 130, 164, 64, 12); //'Push Space'
 					break;
 					
@@ -207,7 +211,13 @@
 				case 'escmenu':
 					// this.bgm1.pause();
 					// this.bgm2.pause();
-					this.ctx.drawImage(this.bmp_escape, 0, 0, 80, 16, 8, 8, 80, 16); //pause screen
+					// this.ctx.drawImage(this.bmp_escape, 0, 0, 80, 16, 8, 8, 80, 16); //pause screen
+					this.drawString(0,0,'CONTINUE:F');
+					this.drawString(0,8,'RESET   :G');
+					this.drawString(0,16,'HELP    :H');
+					if(this.game.help){
+						this.drawString(0,window.height/2,"GOAL: Hit the lemon to earn points, while making\n      sure the pawprints following you don't catch\n      your tail!\n\nPress ESC for pause menu.\nPress Z to toggle 2x zoom.\n\nJiLJiL (c) 1997, Studio Pixel\nBrowser version by IdioticBaka1824");
+					}
 					break;
 					
 				default:

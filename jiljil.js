@@ -32,6 +32,7 @@
     class Game {
         constructor(data=null) {
 			this.gameState = 'loading'; //loading, startscreen, playing, escmenu, gameover
+			this.help = false;
 			this.previousGameState = 'startscreen';
 			this.keyHasBeenPressed = {horizontal:0, vertical:0};
 			
@@ -82,9 +83,9 @@
 			
 			this.friction = 0.05; //applies to player
 			this.gravity = 3; //applies to lemon
-			// this.corLP = 0.5; //coefficient of restitution, applies to lemon-player interaction
-			this.corLW = 0.95; //coefficient of restitution, applies to lemon-wall interaction
-			this.collisionShock = 8; //frames after a collision where player is sent recoiling and is not in control
+			// this.corLP = 0.5; //coefficient of restitution, applies to lemon-player interaction //didn't end up using this
+			this.corLW = 0.97; //coefficient of restitution, applies to lemon-wall interaction
+			this.collisionShock = 6; //frames after a collision where player is sent recoiling and is not in control
 			this.lastCollision = -100; //frame # of last collision of player with wall/lemon
 			this.lemonIdleTime = 0; //if the lemon is sitting at the bottom for too long gotta perk it back up on its own at some point
         }
@@ -337,6 +338,14 @@
 		}
 		
 		keyHandling(ekeys) {
+			if(ekeys['z']){
+				window.scale = window.scale==1?2:1;
+				gameCanvas.width = window.scale*window.width;
+				gameCanvas.height = window.scale*window.height;
+				ui.ctx.imageSmoothingEnabled = false;
+				ui.ctx.scale(window.scale, window.scale);
+				ekeys['z'] = false;
+			}
 			if(ekeys['Escape']){
 				if(this.gameState != 'escmenu'){
 					window.audioContext.suspend();
@@ -401,6 +410,10 @@
 						ui.frameCount = 0;
 						this.gameState = 'startscreen';
 						this.previousGameState = 'startscreen';
+					}
+					if(ekeys['h']){
+						this.help = !this.help;
+						ekeys['h'] = false;
 					}
 					break;
 			}
