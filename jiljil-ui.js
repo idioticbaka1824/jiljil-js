@@ -1,9 +1,19 @@
 (() => {
+	
+	//mod function
+	function abs(x){
+		return x>0 ? x : -1*x;
+	}
+	//pythagoras
+	function dist2(dx, dy){
+		return (dx**2 + dy**2)**0.5;
+	}
+	
     class GameUI {
         /**
          * @param {HTMLCanvasElement} canvas 
          */
-        constructor(canvas) {
+        constructor(canvas, canvas2) {
 			if(Math.random()>0.8){document.getElementById('jiljilIcon').href="BITMAP/2.ico";}
             this.canvas = canvas;
             this.ctx = canvas.getContext("2d");
@@ -11,12 +21,16 @@
 			this.ctx.imageSmoothingEnabled = false;
             this.game = null;
             this.requested = false;
-
-            this.canvas.addEventListener("wheel", this.onScroll.bind(this));
-            if ("ontouchstart" in window) {
-                this.canvas.addEventListener('touchstart', this.onTouchStart.bind(this));
-                this.canvas.addEventListener('touchmove', this.onTouchMove.bind(this));
-                this.canvas.addEventListener('touchend', this.onTouchEnd.bind(this));
+			
+			if ("ontouchstart" in window) {
+                this.canvas2 = canvas2;
+				this.ctx2 = canvas2.getContext('2d');
+				this.ctx.scale(window.scale, window.scale);
+				this.ctx.imageSmoothingEnabled = false;
+				
+				this.canvas2.addEventListener('touchstart', this.onTouchStart.bind(this));
+                this.canvas2.addEventListener('touchmove', this.onTouchMove.bind(this));
+                this.canvas2.addEventListener('touchend', this.onTouchEnd.bind(this));
             }
             
             this.bmp_jiljil = new Image();
@@ -28,10 +42,11 @@
             this.bmp_charactor = new Image();
             this.bmp_charactor.src = "BITMAP/BMP_CHARACTOR.png";
             this.bmp_charactor.addEventListener("load", this.onImageLoad.bind(this));
+            this.bmp_touchUI = new Image();
+            this.bmp_touchUI.src = "BITMAP/eg3.png";
+            this.bmp_touchUI.addEventListener("load", this.onImageLoad.bind(this));
 			
-			
-			this.frameCount = 0; //
-			
+			this.frameCount = 0;
 			
 			this.bgm1_url = new URL('https://raadshaikh.github.io/jiljil-js/WAVE/BGM1.wav');
 			this.bgm1 = new Audio(this.bgm1_url);
@@ -78,19 +93,29 @@
 		
         onTouchStart(e) {
             this.touching = true;
-            this.touchX = e.touches[0].pageX;
-            this.touchY = e.touches[0].pageY;
+            this.touchX = e.touches[0].pageX - this.canvas2.getBoundingClientRect().x;
+            this.touchY = e.touches[0].pageY - this.canvas2.getBoundingClientRect().y;
+			var x = this.touchX - window.width/2;
+			var y = -this.touchY + window.height/2;
+			var r = dist2(x,y);
+			window.keysBeingPressed[' '] = (r<40);
+			window.keysBeingPressed['Esc'] = (this.touchX>32 && this.touchX<32+32 && this.touchY>8 && this.touchY<8+32);
         }
 
         onTouchMove(e) {
             if (this.touching) {
                 e.preventDefault();
-                //const offX = this.touchX - e.touches[0].pageX;
-                const offY = this.touchY - e.touches[0].pageY;
-                this.touchX = e.touches[0].pageX;
-                this.touchY = e.touches[0].pageY;
-
-                this.onScroll({ deltaY: offY });
+                this.touchX = e.touches[0].pageX - this.canvas2.getBoundingClientRect().x;
+                this.touchY = e.touches[0].pageY - this.canvas2.getBoundingClientRect().y;
+				var x = this.touchX - window.width/2;
+				var y = -this.touchY + window.height/2;
+				var r = dist2(x,y);
+				var theta = Math.atan2(y,x);
+				window.keysBeingPressed['ArrowRight'] = (abs(theta-0)<2*Math.PI/4);
+				window.keysBeingPressed['ArrowUp'] = (abs(theta-Math.PI/2)<2*Math.PI/4);
+				window.keysBeingPressed['ArrowLeft'] = ((abs(theta-Math.PI)<2*Math.PI/4) || (abs(theta - -Math.PI)<2*Math.PI/4)); //branch cut at \pm\pi
+				window.keysBeingPressed['ArrowDown'] = (abs(theta - -Math.PI/2)<2*Math.PI/4);
+				// console.log(theta, window.keysBeingPressed);
             }
         }
 
@@ -98,16 +123,22 @@
             this.touching = false;
             this.touchX = 0;
             this.touchY = 0;
-        }
-
-        onScroll(e) {
-            this.scrollY += e.deltaY;
-            this.onUpdate();
+			window.keysBeingPressed = {
+			'ArrowLeft': false,
+			'ArrowRight': false,
+			'ArrowUp': false,
+			'ArrowDown': false,
+			'Escape': false,
+			' ': false,
+			'f': false,
+			'g': false,
+			'k': false,
+			};
         }
         
 
         onImageLoad() {
-            if (this.bmp_jiljil.complete && this.bmp_escape.complete && this.bmp_charactor.complete) {
+            if (this.bmp_jiljil.complete && this.bmp_escape.complete && this.bmp_charactor.complete && this.bmp_touchUI.complete) {
                 this.onUpdate();
             }
         }
@@ -156,7 +187,19 @@
 			this.ctx.fillStyle = 'black';
 			this.ctx.fillRect(0, 0, width, height);
 			
-			
+			//touchscreen ui
+			if ('ontouchstart' in window) {
+				this.ctx2.fillstyle = 'black';
+				this.ctx2.fillRect(0, 0, width, height);
+				for(let i=0; i<=15; i++){
+					// this.ctx2.drawImage(this.bmp_jiljil, 64, 64, 20, 20, i*20, 0, 20, 20); //ceiling
+					// this.ctx2.drawImage(this.bmp_jiljil, 64, 64, 20, 20, i*20, 240-20, 20, 20); //floor
+					this.ctx2.drawImage(this.bmp_jiljil, 64, 64, 20, 20, 0, i*20, 20, 20); //left wall
+					this.ctx2.drawImage(this.bmp_jiljil, 64, 64, 20, 20, 320-20, i*20, 20, 20); //left wall
+				}
+				this.ctx2.drawImage(this.bmp_touchUI, 0, 0, 320, 240, 0, 0, 320, 240);
+					
+			}
 			
 			switch(this.game.gameState) {
 				case 'loading':
@@ -248,6 +291,12 @@
 				this.ctx.drawImage(this.bmp_jiljil, 80, 112, 18, 8, 207, 21, 18, 8); //'hi'
 				this.drawNumber(275, 203, this.game.score, 3); //score
 				this.drawNumber(275, 20, this.game.highscore, 3); //high score
+				
+				//touchscreen ui
+				if ('ontouchstart' in window) {
+					var doNothing = 0;
+				}
+				
 			}
 			if(this.game.gameState == 'gameover'){this.ctx.drawImage(this.bmp_jiljil, 64, 36, 64, 12, 48, 48, 64, 12);}
         }

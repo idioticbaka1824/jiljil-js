@@ -51,8 +51,18 @@
 			gameCanvas.focus();
             gameCanvas.width = scale*width;
             gameCanvas.height = scale*height;
-            const ui = new GameUI(gameCanvas);
-			const game = new Game('b');
+			if('ontouchstart' in window){
+				const touchCanvas = document.createElement('canvas');
+				touchCanvas.id = 'touch-canvas';
+				touchCanvas.width = scale*width;
+				touchCanvas.height = scale*height;
+				<!-- touchCanvas.style.borderStyle = 'solid'; -->
+				<!-- touchCanvas.style.borderWidth = '1px'; -->
+				canvasContainer.appendChild(touchCanvas);
+			}
+			const touchCanvas = document.getElementById('touch-canvas');
+            const ui = new GameUI(gameCanvas, touchCanvas);
+			const game = new Game();
 			ui.setGame(game);
 			setInterval(game.update.bind(game), 1000/fps);
 
@@ -83,6 +93,23 @@
 				let y = event.clientY - rect.top;
 				return [x, y];
 			}
+			
+			document.addEventListener('visibilitychange', function() {
+				if (document.visibilityState != 'visible') {
+					window.audioContext.suspend();
+					game.gameState = 'escmenu';
+				}
+				<!-- if (document.visibilityState === 'visible'){ -->
+					<!-- window.audioContext.resume(); -->
+					<!-- game.gameState = game.previousGameState; -->
+				<!-- } -->
+			});
+			<!-- document.addEventListener("blur", function() { --> this isn't working for some reason
+				<!-- test(); -->
+				<!-- window.audioContext.suspend(); -->
+				<!-- game.gameState = 'escmenu'; -->
+			<!-- }); -->
+			<!-- function test(){console.log('test');}; -->
 			
     </script>
 </body>

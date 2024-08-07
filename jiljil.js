@@ -30,7 +30,7 @@
 	}
 	
     class Game {
-        constructor(data=null) {
+        constructor() {
 			this.gameState = 'loading'; //loading, startscreen, playing, escmenu, gameover
 			this.help = false;
 			this.previousGameState = 'startscreen';
@@ -54,7 +54,7 @@
 			this.player_w0 = 5;
 			this.playerSeg_dt = 0.05;
 			this.playerSeg_zeta = 0.5; //the segments are a bit underdamped
-			this.playerSeg_w0 = 6; //wonder if these parameters need to be unique to each segment
+			this.playerSeg_w0 = 5.5; //wonder if these parameters need to be unique to each segment
 			this.sparkle_dt = 0.05;
 			this.sparkle_w0 = 1;
 			this.playerSegSize = [13, 12, 11, 10, 9, 8, 16];
@@ -201,6 +201,7 @@
 							switch((ui.frameCount/this.pawPeriod)%4){
 								case 0:
 									this.paw0Pos = {x:window.width*2, y:window.height*2}; //move it off-screen so it 'disappears'
+									ui.se[2].play();
 									break;
 								case 1:
 									this.paw0Pos.x = this.sparklePos.x;
@@ -210,6 +211,7 @@
 									this.sparklePosPrev.x = this.sparklePos.x;
 									this.sparklePosPrev.y = this.sparklePos.y;
 									this.paw1Pos = {x:window.width*2, y:window.height*2};
+									ui.se[2].play();
 									break;
 								case 3:
 									this.paw1Pos.x = this.sparklePosPrev.x;
@@ -225,7 +227,7 @@
 					//collisions
 					
 					//playerTail-pawPrint
-					if(ui.frameCount>this.respiteFrames){
+					if(false && ui.frameCount>this.respiteFrames){
 						if((abs(this.playerSegPos[6].x-this.paw0Pos.x)<32/2 && abs(this.playerSegPos[6].y-this.paw0Pos.y)<32/2) || (abs(this.playerSegPos[6].x-this.paw1Pos.x)<32/2 && abs(this.playerSegPos[6].y-this.paw1Pos.y)<32/2)){
 							ui.se[5].play();
 							if(this.score > this.highscore){this.highscore = this.score;}
