@@ -45,10 +45,11 @@
 			this.playerAcc = {x:0, y:0};
 			this.playerMaxVel = 2;
 			this.playerMaxAcc = 1;
-			this.playerMass = 1;
-			this.playerCurPos = {x:window.width/2, y:window.height-20-16/2};
-			this.playerCurVel = 3;
+			this.playerMass = 2;
 			this.player_dt = 0.05;
+			this.playerCurPos = {x:window.width/2, y:window.height-20-16/2};
+			this.playerCurVel = {x:0, y:0};
+			this.playerCurBaseVel = 3/this.player_dt;
 			this.player_w0 = 5;
 			this.playerSeg_dt = 0.05;
 			this.playerSeg_zeta = 0.5; //the segments are a bit underdamped
@@ -71,8 +72,8 @@
 			
 			this.lemonPos = {x:72+48/2, y:16+48/2};
 			this.lemonVel = {x:0.5, y:0};
-			this.lemonAcc = {x:0, y:0};
-			this.lemonMass = 30;
+			this.lemonMass = 1;
+			this.lemon_dt = 0.05;
 			
 			this.paw0Pos = {x:146, y:211};
 			this.paw1Pos = {x:186, y:216};
@@ -80,9 +81,12 @@
 			this.respiteFrames = 64;
 			
 			this.friction = 0.05; //applies to player
-			this.gravity = 0.1; //applies to lemon
-			this.corLP = 0.5; //coefficient of restitution, applies to lemon-player interaction
+			this.gravity = 3; //applies to lemon
+			// this.corLP = 0.5; //coefficient of restitution, applies to lemon-player interaction
 			this.corLW = 0.95; //coefficient of restitution, applies to lemon-wall interaction
+			this.collisionShock = 8; //frames after a collision where player is sent recoiling and is not in control
+			this.lastCollision = -100; //frame # of last collision of player with wall/lemon
+			this.lemonIdleTime = 0; //if the lemon is sitting at the bottom for too long gotta perk it back up on its own at some point
         }
 		
 		resetStuff(){
@@ -101,11 +105,12 @@
 			this.sparkleVel = {x:0, y:0};
 			this.sparkleAcc = {x:0, y:0};
 			this.lemonPos = {x:72+48/2, y:16+48/2};
-			this.lemonVel = {x:0.5, y:0};
-			this.lemonAcc = {x:0, y:0};
+			this.lemonVel = {x:10, y:0};
 			this.paw0Pos = {x:146, y:211};
 			this.paw1Pos = {x:186, y:216};
 			ui.frameCount = 0;
+			this.lastCollision = -100;
+			this.lemonIdleTime = 0;
 		}
 		
         update() {
@@ -130,8 +135,91 @@
 					
 					//initial upward movement
 					if(ui.frameCount<this.respiteFrames && this.playerCurPos.y>20+16/2+28){
-						this.playerCurPos.y -= this.playerCurVel;
+						this.playerCurPos.y -= this.player_dt*this.playerCurBaseVel;
 					}
+										
+					
+					//player input
+						//old stuff
+						// this.playerAcc.x += 0.1*this.keyHasBeenPressed.horizontal;
+						// this.playerAcc.x *= Math.abs(this.keyHasBeenPressed.horizontal); //reset acceleration to 0 when no key is pressed
+						// this.playerVel.x = clamp(this.playerVel.x, -this.playerMaxVel, this.playerMaxVel);
+						// this.playerVel.x += this.playerAcc.x - this.friction*Math.sign(this.playerVel.x);
+						// this.playerPos.x += this.playerVel.x;
+					//A virtual 'cursor' controls the ultimate position of the player's head, which takes some time to catch up. Modeled as a critically damped oscillator.
+					if(ui.frameCount-this.lastCollision > this.collisionShock){this.playerCurVel.x = this.playerCurBaseVel*this.keyHasBeenPressed.horizontal;}
+					this.playerCurPos.x += this.player_dt*this.playerCurVel.x;
+					this.playerAcc.x = -(this.player_w0**2)*(this.playerPos.x - this.playerCurPos.x) + -2*this.player_w0*(this.playerVel.x);
+					this.playerVel.x += this.player_dt*this.playerAcc.x;
+					this.playerPos.x += this.player_dt*this.playerVel.x;
+					
+					if(ui.frameCount-this.lastCollision > this.collisionShock){this.playerCurVel.y = this.playerCurBaseVel*this.keyHasBeenPressed.vertical;}
+					this.playerCurPos.y += this.player_dt*this.playerCurVel.y;
+					this.playerAcc.y = -(this.player_w0**2)*(this.playerPos.y - this.playerCurPos.y) + -2*this.player_w0*(this.playerVel.y);
+					this.playerVel.y += this.player_dt*this.playerAcc.y;
+					this.playerPos.y += this.player_dt*this.playerVel.y;
+					
+					this.playerSegAcc[0].x = -(this.playerSeg_w0**2)*(this.playerSegPos[0].x - this.playerPos.x) + -2*this.playerSeg_zeta*this.playerSeg_w0*(this.playerSegVel[0].x);
+					for(let i=1; i<7; i++){
+						this.playerSegAcc[i].x = -(this.playerSeg_w0**2)*(this.playerSegPos[i].x - this.playerSegPos[i-1].x) + -2*this.playerSeg_zeta*this.playerSeg_w0*(this.playerSegVel[i].x);
+					}
+					for(let i=0; i<7; i++){
+					this.playerSegVel[i].x += this.playerSeg_dt*this.playerSegAcc[i].x;
+					this.playerSegPos[i].x += this.playerSeg_dt*this.playerSegVel[i].x;
+					}
+					this.playerSegAcc[0].y = -(this.playerSeg_w0**2)*(this.playerSegPos[0].y - this.playerPos.y) + -2*this.playerSeg_zeta*this.playerSeg_w0*(this.playerSegVel[0].y);
+					for(let i=1; i<7; i++){
+						this.playerSegAcc[i].y = -(this.playerSeg_w0**2)*(this.playerSegPos[i].y - this.playerSegPos[i-1].y) + -2*this.playerSeg_zeta*this.playerSeg_w0*(this.playerSegVel[i].y);
+					}
+					for(let i=0; i<7; i++){
+					this.playerSegVel[i].y += this.playerSeg_dt*this.playerSegAcc[i].y;
+					this.playerSegPos[i].y += this.playerSeg_dt*this.playerSegVel[i].y;
+					}
+					
+					this.sparkleAcc.x = -(this.sparkle_w0**2)*(this.sparklePos.x - this.playerSegPos[6].x) + -2*this.sparkle_w0*(this.sparkleVel.x);
+					this.sparkleVel.x += this.sparkle_dt*this.sparkleAcc.x;
+					this.sparklePos.x += this.sparkle_dt*this.sparkleVel.x;
+					this.sparkleAcc.y = -(this.sparkle_w0**2)*(this.sparklePos.y - this.playerSegPos[6].y) + -2*this.sparkle_w0*(this.sparkleVel.y);
+					this.sparkleVel.y += this.sparkle_dt*this.sparkleAcc.y;
+					this.sparklePos.y += this.sparkle_dt*this.sparkleVel.y;
+					this.sparkleFrame += 1;
+					this.sparkleFrame %= 4;
+					
+					this.keyHasBeenPressed = {horizontal:0, vertical:0};
+					
+					//lemon bouncing
+					if(this.lemonPos.y > 220-60/2){this.lemonIdleTime += 1;}
+					if(this.lemonIdleTime > window.fps*10){this.lemonVel.y=-100;this.lemonIdleTime=0;}
+					this.lemonPos.x += this.lemon_dt*this.lemonVel.x;
+					this.lemonVel.y += this.gravity; //in computers, +y is downward
+					this.lemonPos.y += this.lemon_dt*this.lemonVel.y;
+					
+					//pawprint movement
+					if(ui.frameCount>this.respiteFrames){//they're inactive for a bit at the beginning
+						if(ui.frameCount % this.pawPeriod == 0){
+							switch((ui.frameCount/this.pawPeriod)%4){
+								case 0:
+									this.paw0Pos = {x:window.width*2, y:window.height*2}; //move it off-screen so it 'disappears'
+									break;
+								case 1:
+									this.paw0Pos.x = this.sparklePos.x;
+									this.paw0Pos.y = this.sparklePos.y;
+									break;
+								case 2:
+									this.sparklePosPrev.x = this.sparklePos.x;
+									this.sparklePosPrev.y = this.sparklePos.y;
+									this.paw1Pos = {x:window.width*2, y:window.height*2};
+									break;
+								case 3:
+									this.paw1Pos.x = this.sparklePosPrev.x;
+									this.paw1Pos.y = this.sparklePosPrev.y;
+									break;
+								default:
+									break;
+							}
+						}
+					}
+					
 					
 					//collisions
 					
@@ -181,27 +269,48 @@
 					}
 					
 					//player-lemon
-					const dx = this.lemonPos.x-this.playerPos.x;
-					const dy = this.lemonPos.y-this.playerPos.y;
+					let dx = this.lemonPos.x-this.playerPos.x;
+					let dy = this.lemonPos.y-this.playerPos.y;
+					const r = dist2(dx, dy);
 					const dvx = this.playerVel.x-this.lemonVel.x;
 					const dvy = this.playerVel.y-this.lemonVel.y;
-					const r = dist2(dx, dy);
-					const k1 = (this.playerMass - this.lemonMass)/(this.playerMass + this.lemonMass);
-					const k2 = 2*this.playerMass/(this.playerMass + this.lemonMass);
-					const v1 = structuredClone(this.playerVel);
-					const v2 = structuredClone(this.lemonVel);
-					const approachAngle = angle(dx, dy, dvx, dvy);
-					const headonV1 = this.corLP*dist2(v1.x,v1.y)*Math.cos(approachAngle);
-					const glanceV1 = dist2(v1.x,v1.y)*Math.sin(approachAngle);
+					
 					if((r<(48/2 + 16/2)) && (dot(dx, dy, dvx, dvy)>0)){
-						this.playerVel.x = k1*headonV1*dx/r + glanceV1*dy/r + v2.x;
-						this.playerVel.y = k1*headonV1*dy/r + glanceV1*dx/r + v2.y;
-						this.lemonVel.x = k2*headonV1*dx/r - v2.x; //something's not right here??
-						this.lemonVel.y = k2*headonV1*dy/r - v2.y;
-						this.playerPos.x = this.lemonPos.x-(48/2+16/2)*dx/r;
-						this.playerPos.y = this.lemonPos.y-(48/2+16/2)*dy/r;
-						this.playerCurPos.x = this.lemonPos.x-(48/2+18/2)*dx/r;
-						this.playerCurPos.y = this.lemonPos.y-(48/2+18/2)*dy/r;
+						this.lastCollision = structuredClone(ui.frameCount);
+						
+						dx /= r;
+						dy /= r; //now {dx, dy} = normalised displacement vector
+						const k1 = (this.playerMass - this.lemonMass)/(this.playerMass + this.lemonMass);
+						const k2 = 2*this.playerMass/(this.playerMass + this.lemonMass);
+						const k3 = 2*this.lemonMass/(this.playerMass + this.lemonMass);
+						const u1 = structuredClone(this.playerVel);
+						const u2 = structuredClone(this.lemonVel);
+						
+						const u1h_x = dot(u1.x, u1.y, dx, dy)*dx; //h for head-on
+						const u1h_y = dot(u1.x, u1.y, dx, dy)*dy;
+						const u2h_x = dot(u2.x, u2.y, dx, dy)*dx;
+						const u2h_y = dot(u2.x, u2.y, dx, dy)*dy;
+						
+						const v1h_x = k1*u1h_x + k3*u2h_x;
+						const v1h_y = k1*u1h_y + k3*u2h_y;
+						const v2h_x = k2*u1h_x - k1*u2h_x;
+						const v2h_y = k2*u1h_y - k1*u2h_y;
+						
+						const v1g_x = u1.x-u1h_x; //g for glancing
+						const v1g_y = u1.y-u1h_y;
+						const v2g_x = u2.x-u2h_x;
+						const v2g_y = u2.y-u2h_y;
+						
+						this.playerVel.x = (v1h_x + v1g_x);
+						this.playerVel.y = (v1h_y + v1g_y);
+						this.playerCurVel.x = (v1h_x + v1g_x);
+						this.playerCurVel.y = (v1h_y + v1g_y);
+						this.lemonVel.x = v2h_x + v2g_x;
+						this.lemonVel.y = v2h_y + v2g_y;
+						this.playerPos.x = this.lemonPos.x-(50/2+16/2)*dx;
+						this.playerPos.y = this.lemonPos.y-(50/2+16/2)*dy;
+						this.playerCurPos.x = this.lemonPos.x-(50/2+18/2)*dx;
+						this.playerCurPos.y = this.lemonPos.y-(50/2+18/2)*dy;
 						this.score += 1;
 						ui.se[0].play();
 					}
@@ -214,83 +323,6 @@
 					// }
 					
 					
-					//player input
-						//old stuff
-						// this.playerAcc.x += 0.1*this.keyHasBeenPressed.horizontal;
-						// this.playerAcc.x *= Math.abs(this.keyHasBeenPressed.horizontal); //reset acceleration to 0 when no key is pressed
-						// this.playerVel.x = clamp(this.playerVel.x, -this.playerMaxVel, this.playerMaxVel);
-						// this.playerVel.x += this.playerAcc.x - this.friction*Math.sign(this.playerVel.x);
-						// this.playerPos.x += this.playerVel.x;
-					//A virtual 'cursor' controls the ultimate position of the player's head, which takes some time to catch up. Modeled as a critically damped oscillator.
-					this.playerCurPos.x += this.playerCurVel*this.keyHasBeenPressed.horizontal;
-					this.playerAcc.x = -(this.player_w0**2)*(this.playerPos.x - this.playerCurPos.x) + -2*this.player_w0*(this.playerVel.x);
-					this.playerVel.x += this.player_dt*this.playerAcc.x;
-					this.playerPos.x += this.player_dt*this.playerVel.x;
-					
-					this.playerCurPos.y += this.playerCurVel*this.keyHasBeenPressed.vertical;
-					this.playerAcc.y = -(this.player_w0**2)*(this.playerPos.y - this.playerCurPos.y) + -2*this.player_w0*(this.playerVel.y);
-					this.playerVel.y += this.player_dt*this.playerAcc.y;
-					this.playerPos.y += this.player_dt*this.playerVel.y;
-					
-					this.playerSegAcc[0].x = -(this.playerSeg_w0**2)*(this.playerSegPos[0].x - this.playerPos.x) + -2*this.playerSeg_zeta*this.playerSeg_w0*(this.playerSegVel[0].x);
-					for(let i=1; i<7; i++){
-						this.playerSegAcc[i].x = -(this.playerSeg_w0**2)*(this.playerSegPos[i].x - this.playerSegPos[i-1].x) + -2*this.playerSeg_zeta*this.playerSeg_w0*(this.playerSegVel[i].x);
-					}
-					for(let i=0; i<7; i++){
-					this.playerSegVel[i].x += this.playerSeg_dt*this.playerSegAcc[i].x;
-					this.playerSegPos[i].x += this.playerSeg_dt*this.playerSegVel[i].x;
-					}
-					this.playerSegAcc[0].y = -(this.playerSeg_w0**2)*(this.playerSegPos[0].y - this.playerPos.y) + -2*this.playerSeg_zeta*this.playerSeg_w0*(this.playerSegVel[0].y);
-					for(let i=1; i<7; i++){
-						this.playerSegAcc[i].y = -(this.playerSeg_w0**2)*(this.playerSegPos[i].y - this.playerSegPos[i-1].y) + -2*this.playerSeg_zeta*this.playerSeg_w0*(this.playerSegVel[i].y);
-					}
-					for(let i=0; i<7; i++){
-					this.playerSegVel[i].y += this.playerSeg_dt*this.playerSegAcc[i].y;
-					this.playerSegPos[i].y += this.playerSeg_dt*this.playerSegVel[i].y;
-					}
-					
-					this.sparkleAcc.x = -(this.sparkle_w0**2)*(this.sparklePos.x - this.playerSegPos[6].x) + -2*this.sparkle_w0*(this.sparkleVel.x);
-					this.sparkleVel.x += this.sparkle_dt*this.sparkleAcc.x;
-					this.sparklePos.x += this.sparkle_dt*this.sparkleVel.x;
-					this.sparkleAcc.y = -(this.sparkle_w0**2)*(this.sparklePos.y - this.playerSegPos[6].y) + -2*this.sparkle_w0*(this.sparkleVel.y);
-					this.sparkleVel.y += this.sparkle_dt*this.sparkleAcc.y;
-					this.sparklePos.y += this.sparkle_dt*this.sparkleVel.y;
-					this.sparkleFrame += 1;
-					this.sparkleFrame %= 4;
-					
-					this.keyHasBeenPressed = {horizontal:0, vertical:0};
-					
-					//lemon bouncing
-					this.lemonVel.x += this.lemonAcc.x;
-					this.lemonPos.x += this.lemonVel.x;
-					this.lemonVel.y += this.gravity; //in computers, +y is downward
-					this.lemonPos.y += this.lemonVel.y;
-					
-					//pawprint movement
-					if(ui.frameCount>this.respiteFrames){//they're inactive for a bit at the beginning
-						if(ui.frameCount % this.pawPeriod == 0){
-							switch((ui.frameCount/this.pawPeriod)%4){
-								case 0:
-									this.paw0Pos = {x:window.width*2, y:window.height*2}; //move it off-screen so it 'disappears'
-									break;
-								case 1:
-									this.paw0Pos.x = this.sparklePos.x;
-									this.paw0Pos.y = this.sparklePos.y;
-									break;
-								case 2:
-									this.sparklePosPrev.x = this.sparklePos.x;
-									this.sparklePosPrev.y = this.sparklePos.y;
-									this.paw1Pos = {x:window.width*2, y:window.height*2};
-									break;
-								case 3:
-									this.paw1Pos.x = this.sparklePosPrev.x;
-									this.paw1Pos.y = this.sparklePosPrev.y;
-									break;
-								default:
-									break;
-							}
-						}
-					}
 					break;
 				
 				case 'gameover':
@@ -329,7 +361,7 @@
 					break;
 				
 				case 'playing':
-					if(ui.frameCount>this.respiteFrames/2){
+					if(ui.frameCount>this.respiteFrames*0.7){
 						if(ekeys['ArrowLeft']){
 							this.keyHasBeenPressed.horizontal = -1;
 						}
