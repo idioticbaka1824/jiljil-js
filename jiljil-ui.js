@@ -99,7 +99,7 @@
 			var y = -this.touchY + window.height/2;
 			var r = dist2(x,y);
 			window.keysBeingPressed[' '] = (r<40);
-			window.keysBeingPressed['Esc'] = (this.touchX>32 && this.touchX<32+32 && this.touchY>8 && this.touchY<8+32);
+			window.keysBeingPressed['Escape'] = (this.touchX>32 && this.touchX<32+32 && this.touchY>8 && this.touchY<8+32);
         }
 
         onTouchMove(e) {
@@ -111,10 +111,10 @@
 				var y = -this.touchY + window.height/2;
 				var r = dist2(x,y);
 				var theta = Math.atan2(y,x);
-				window.keysBeingPressed['ArrowRight'] = (abs(theta-0)<2*Math.PI/4);
-				window.keysBeingPressed['ArrowUp'] = (abs(theta-Math.PI/2)<2*Math.PI/4);
-				window.keysBeingPressed['ArrowLeft'] = ((abs(theta-Math.PI)<2*Math.PI/4) || (abs(theta - -Math.PI)<2*Math.PI/4)); //branch cut at \pm\pi
-				window.keysBeingPressed['ArrowDown'] = (abs(theta - -Math.PI/2)<2*Math.PI/4);
+				window.keysBeingPressed['ArrowRight'] = (abs(theta-0)<2*Math.PI/8);
+				window.keysBeingPressed['ArrowUp'] = (abs(theta-Math.PI/2)<2*Math.PI/8);
+				window.keysBeingPressed['ArrowLeft'] = ((abs(theta-Math.PI)<2*Math.PI/8) || (abs(theta - -Math.PI)<2*Math.PI/8)); //branch cut at \pm\pi
+				window.keysBeingPressed['ArrowDown'] = (abs(theta - -Math.PI/2)<2*Math.PI/8);
 				// console.log(theta, window.keysBeingPressed);
             }
         }
