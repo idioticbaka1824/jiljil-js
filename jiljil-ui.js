@@ -31,6 +31,9 @@
 				this.canvas2.addEventListener('touchstart', this.onTouchStart.bind(this));
                 this.canvas2.addEventListener('touchmove', this.onTouchMove.bind(this));
                 this.canvas2.addEventListener('touchend', this.onTouchEnd.bind(this));
+				this.canvas.addEventListener('touchstart', this.onTouchStart.bind(this));
+                this.canvas.addEventListener('touchmove', this.onTouchMove.bind(this));
+                this.canvas.addEventListener('touchend', this.onTouchEnd.bind(this));
             }
             
             this.bmp_jiljil = new Image();
@@ -98,8 +101,12 @@
 			var x = this.touchX - window.width/2;
 			var y = -this.touchY + window.height/2;
 			var r = dist2(x,y);
+			console.log(e.touches[0].pageX, e.touches[0].pageY);
 			window.keysBeingPressed[' '] = (r<40);
 			window.keysBeingPressed['Escape'] = (this.touchX>32 && this.touchX<32+32 && this.touchY>8 && this.touchY<8+32);
+			window.keysBeingPressed['f'] = (e.touches[0].pageX>80 && e.touches[0].pageX<160 && e.touches[0].pageY<100);
+			window.keysBeingPressed['g'] = (e.touches[0].pageX>160 && e.touches[0].pageX<240 && e.touches[0].pageY<100);
+			window.keysBeingPressed['h'] = (e.touches[0].pageX>240 && e.touches[0].pageY<100);
         }
 
         onTouchMove(e) {
@@ -164,12 +171,12 @@
 				}
         }
 		
-		drawString(x, y, str){
+		drawString(x, y, str, zoom=1){
 			let newlines = [0];
 			for(let i=0; i<str.length; i++){
 				if(str[i]=='\n'){newlines.push(i);}
 				if(str.charCodeAt(i)>=0x20){
-					this.ctx.drawImage(this.bmp_charactor, 8*((str.charCodeAt(i)-0x20)%10), 8*~~((str.charCodeAt(i)-0x20)/10), 8, 8, x+6*(i-newlines[newlines.length-1]-(newlines.length>1)), y+8*(newlines.length-1), 8, 8); //~~ is shortcut for floor function somehow
+					this.ctx.drawImage(this.bmp_charactor, 8*((str.charCodeAt(i)-0x20)%10), 8*~~((str.charCodeAt(i)-0x20)/10), 8, 8, x+6*(i-newlines[newlines.length-1]-(newlines.length>1))*zoom, y+8*(newlines.length-1)*zoom, 8*zoom, 8*zoom); //~~ is shortcut for floor function somehow
 				}
 			}
 		}
@@ -259,6 +266,13 @@
 					this.drawString(0,0,'CONTINUE:F');
 					this.drawString(0,8,'RESET   :G');
 					this.drawString(0,16,'HELP    :H');
+					if ('ontouchstart' in window) {
+						this.ctx.filter = 'brightness(50%)';
+						this.drawString(104,28,'F', 5);
+						this.drawString(104+80*1,28,'G', 5);
+						this.drawString(104+80*2,28,'H', 5);
+						this.ctx.filter = 'none';
+					}
 					if(this.game.help){
 						this.drawString(0,window.height/2,"GOAL: Hit the lemon to earn points, while making\n      sure the pawprints following you don't catch\n      your tail!\n\nPress ESC for pause menu.\nPress Z to toggle 2x zoom.\n\nJiLJiL (c) 1997, Studio Pixel\nBrowser version by IdioticBaka1824");
 					}
