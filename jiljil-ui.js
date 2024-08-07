@@ -4,6 +4,7 @@
          * @param {HTMLCanvasElement} canvas 
          */
         constructor(canvas) {
+			if(Math.random()>0.8){document.getElementById('jiljilIcon').href="BITMAP/2.ico";}
             this.canvas = canvas;
             this.ctx = canvas.getContext("2d");
 			this.ctx.scale(window.scale, window.scale); //zoom
