@@ -115,7 +115,7 @@
         onTouchMove(e) {
             if (this.touching) {
                 e.preventDefault();
-				// window.keysBeingPressed[' '] = false;
+				window.keysBeingPressed[' '] = false;
                 this.touchX = e.touches[0].clientX - this.canvas2.getBoundingClientRect().x;
                 this.touchY = e.touches[0].clientY - this.canvas2.getBoundingClientRect().y;
 				this.touchX /= window.scale;

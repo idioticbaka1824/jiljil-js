@@ -89,7 +89,9 @@
 			this.collisionShock = 6; //frames after a collision where player is sent recoiling and is not in control
 			this.lastCollision = -100; //frame # of last collision of player with wall/lemon
 			this.lemonIdleTime = 0; //if the lemon is sitting at the bottom for too long gotta perk it back up on its own at some point
-        }
+        
+			this.debugInvulnerability = false;
+		}
 		
 		resetStuff(){
 			this.score = 0;
@@ -229,8 +231,8 @@
 					//collisions
 					
 					//playerTail-pawPrint
-					if(ui.frameCount>this.respiteFrames){
-						if((abs(this.playerSegPos[6].x-this.paw0Pos.x)<32/2 && abs(this.playerSegPos[6].y-this.paw0Pos.y)<32/2) || (abs(this.playerSegPos[6].x-this.paw1Pos.x)<32/2 && abs(this.playerSegPos[6].y-this.paw1Pos.y)<32/2)){
+					if(!this.debugInvulnerability && ui.frameCount>this.respiteFrames){
+						if((abs(this.playerSegPos[6].x-this.paw0Pos.x)<24/2 && abs(this.playerSegPos[6].y-this.paw0Pos.y)<24/2) || (abs(this.playerSegPos[6].x-this.paw1Pos.x)<24/2 && abs(this.playerSegPos[6].y-this.paw1Pos.y)<24/2)){
 							ui.se[5].play();
 							if(this.score > this.highscore){this.highscore = this.score;}
 							this.gameState = 'gameover';
