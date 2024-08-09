@@ -102,8 +102,8 @@
 			var x = this.touchX - window.width/2;
 			var y = -this.touchY + window.height/2;
 			var r = dist2(x,y);
-			window.keysBeingPressed[' '] = (r<40);
-			window.keysBeingPressed['Escape'] = (this.touchX>32-5 && this.touchX<32+32+5 && this.touchY>8-5 && this.touchY<8+32+5); //\pm 5 grace pixels for fat fingering
+			window.keysBeingPressed[' '] = (r<50);
+			window.keysBeingPressed['Escape'] = (this.touchX>32-10 && this.touchX<32+32+10 && this.touchY>8-10 && this.touchY<8+32+10); //\pm 10 grace pixels for fat fingering
 			window.keysBeingPressed['f'] = (e.touches[0].pageX>80 && e.touches[0].pageX<160 && e.touches[0].pageY<100);
 			window.keysBeingPressed['g'] = (e.touches[0].pageX>160 && e.touches[0].pageX<240 && e.touches[0].pageY<100);
 			window.keysBeingPressed['h'] = (e.touches[0].pageX>240 && e.touches[0].pageY<100);
