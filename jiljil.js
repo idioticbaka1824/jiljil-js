@@ -46,7 +46,7 @@
 			this.playerAcc = {x:0, y:0};
 			this.playerMaxVel = 2;
 			this.playerMaxAcc = 1;
-			this.playerMass = 2;
+			this.playerMass = 2.2;
 			this.player_dt = 0.05;
 			this.playerCurPos = {x:window.width/2, y:window.height-20-16/2};
 			this.playerCurVel = {x:0, y:0};
@@ -346,6 +346,12 @@
 				gameCanvas.height = window.scale*window.height;
 				ui.ctx.imageSmoothingEnabled = false;
 				ui.ctx.scale(window.scale, window.scale);
+				if('ontouchstart' in window){
+					touchCanvas.width = window.scale*window.width;
+					touchCanvas.height = window.scale*window.height;
+					ui.ctx2.imageSmoothingEnabled = false;
+					ui.ctx2.scale(window.scale, window.scale);
+				}
 				ekeys['z'] = false;
 			}
 			if(ekeys['Escape']){

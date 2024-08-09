@@ -99,11 +99,14 @@
             this.touching = true;
             this.touchX = e.touches[0].pageX - this.canvas2.getBoundingClientRect().x;
             this.touchY = e.touches[0].pageY - this.canvas2.getBoundingClientRect().y;
+			this.touchX /= window.scale;
+			this.touchY /= window.scale;
 			var x = this.touchX - window.width/2;
 			var y = -this.touchY + window.height/2;
 			var r = dist2(x,y);
 			window.keysBeingPressed[' '] = (r<50);
 			window.keysBeingPressed['Escape'] = (this.touchX>32-10 && this.touchX<32+32+10 && this.touchY>8-10 && this.touchY<8+32+10); //\pm 10 grace pixels for fat fingering
+			window.keysBeingPressed['z'] = (this.touchX>32-10 && this.touchX<32+32+10 && this.touchY>200-10 && this.touchY<200+32+10);
 			window.keysBeingPressed['f'] = (e.touches[0].pageX>80 && e.touches[0].pageX<160 && e.touches[0].pageY<100);
 			window.keysBeingPressed['g'] = (e.touches[0].pageX>160 && e.touches[0].pageX<240 && e.touches[0].pageY<100);
 			window.keysBeingPressed['h'] = (e.touches[0].pageX>240 && e.touches[0].pageY<100);
@@ -114,6 +117,8 @@
                 e.preventDefault();
                 this.touchX = e.touches[0].pageX - this.canvas2.getBoundingClientRect().x;
                 this.touchY = e.touches[0].pageY - this.canvas2.getBoundingClientRect().y;
+				this.touchX /= window.scale;
+				this.touchY /= window.scale;
 				var x = this.touchX - window.width/2;
 				var y = -this.touchY + window.height/2;
 				var r = dist2(x,y);
@@ -206,6 +211,7 @@
 				}
 				// this.ctx2.drawImage(this.bmp_touchUI, 0, 0, 320, 240, 0, 0, 320, 240);
 				this.ctx2.drawImage(this.bmp_touchUI, 0, 0, 32, 32, 32, 8, 32, 32); //esc button
+				this.ctx2.drawImage(this.bmp_touchUI, 0, 72, 32, 32, 32, 200, 32, 32); //z button
 				this.ctx2.drawImage(this.bmp_touchUI, 88, 0, 196, 196, 60, 20, 196, 196); //tan circle
 				for(let i=0; i<8; i++){ //compass rose
 					var x=160+90*Math.cos(i*2*Math.PI/8);
@@ -248,20 +254,20 @@
 					
 				case 'startscreen':
 					this.stop_bgm();
-					if(this.frameCount==28){this.se[7].play();}
-					if(this.frameCount>60){
+					if(this.frameCount==24){this.se[7].play();}
+					if(this.frameCount>56){
 						this.ctx.drawImage(this.bmp_jiljil, 88, 64, 36, 20, 124, 50, 36, 20); //'JiL'
 						this.ctx.drawImage(this.bmp_jiljil, 88, 64, 36, 20, 124+36, 50, 36, 20); //'JiL'
 					}
-					if(this.frameCount==60){this.se[8].play();}
-					if(this.frameCount>92){
+					if(this.frameCount==56){this.se[8].play();}
+					if(this.frameCount>90){
 						this.ctx.drawImage(this.bmp_jiljil, 80, 24, 48, 8, 137, 119, 48, 8); //'1997-10-xx'
 					}
-					if(this.frameCount==92){this.se[9].play();}
-					if(this.frameCount>128){
+					if(this.frameCount==90){this.se[9].play();}
+					if(this.frameCount>125){
 						this.ctx.drawImage(this.bmp_jiljil, 64, 102, 56, 10, 132, 139, 56, 10); //'Tortoiseshell'
 					}
-					if(this.frameCount==128){this.se[10].play();}
+					if(this.frameCount==125){this.se[10].play();}
 					if(this.frameCount>172){
 						this.ctx.drawImage(this.bmp_jiljil, 64, 36, 64, 12, 130, 164, 64, 12); //'Push Space'
 					}
