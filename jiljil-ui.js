@@ -107,9 +107,9 @@
 			window.keysBeingPressed[' '] = (r<50);
 			window.keysBeingPressed['Escape'] = (this.touchX>32-10 && this.touchX<32+32+10 && this.touchY>8-10 && this.touchY<8+32+10); //\pm 10 grace pixels for fat fingering
 			window.keysBeingPressed['z'] = (this.touchX>32-10 && this.touchX<32+32+10 && this.touchY>200-10 && this.touchY<200+32+10);
-			window.keysBeingPressed['f'] = (e.touches[0].pageX>80 && e.touches[0].pageX<160 && e.touches[0].pageY<100);
-			window.keysBeingPressed['g'] = (e.touches[0].pageX>160 && e.touches[0].pageX<240 && e.touches[0].pageY<100);
-			window.keysBeingPressed['h'] = (e.touches[0].pageX>240 && e.touches[0].pageY<100);
+			window.keysBeingPressed['f'] = (e.touches[0].pageX/window.scale>80 && e.touches[0].pageX/window.scale<160 && e.touches[0].pageY/window.scale<100);
+			window.keysBeingPressed['g'] = (e.touches[0].pageX/window.scale>160 && e.touches[0].pageX/window.scale<240 && e.touches[0].pageY/window.scale<100);
+			window.keysBeingPressed['h'] = (e.touches[0].pageX/window.scale>240 && e.touches[0].pageY/window.scale<100);
         }
 
         onTouchMove(e) {
