@@ -227,7 +227,7 @@
 					//collisions
 					
 					//playerTail-pawPrint
-					if(ui.frameCount>this.respiteFrames){
+					if(false && ui.frameCount>this.respiteFrames){
 						if((abs(this.playerSegPos[6].x-this.paw0Pos.x)<32/2 && abs(this.playerSegPos[6].y-this.paw0Pos.y)<32/2) || (abs(this.playerSegPos[6].x-this.paw1Pos.x)<32/2 && abs(this.playerSegPos[6].y-this.paw1Pos.y)<32/2)){
 							ui.se[5].play();
 							if(this.score > this.highscore){this.highscore = this.score;}

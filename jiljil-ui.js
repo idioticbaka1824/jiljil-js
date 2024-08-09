@@ -97,14 +97,14 @@
 		
         onTouchStart(e) {
             this.touching = true;
-            this.touchX = e.touches[0].pageX - this.canvas2.getBoundingClientRect().x;
-            this.touchY = e.touches[0].pageY - this.canvas2.getBoundingClientRect().y;
+            this.touchX = e.touches[0].clientX - this.canvas2.getBoundingClientRect().x;
+            this.touchY = e.touches[0].clientY - this.canvas2.getBoundingClientRect().y;
 			this.touchX /= window.scale;
 			this.touchY /= window.scale;
 			var x = this.touchX - window.width/2;
 			var y = -this.touchY + window.height/2;
 			var r = dist2(x,y);
-			window.keysBeingPressed[' '] = (r<50);
+			window.keysBeingPressed[' '] = (r<52);
 			window.keysBeingPressed['Escape'] = (this.touchX>32-10 && this.touchX<32+32+10 && this.touchY>8-10 && this.touchY<8+32+10); //\pm 10 grace pixels for fat fingering
 			window.keysBeingPressed['z'] = (this.touchX>32-10 && this.touchX<32+32+10 && this.touchY>200-10 && this.touchY<200+32+10);
 			window.keysBeingPressed['f'] = (e.touches[0].pageX/window.scale>80 && e.touches[0].pageX/window.scale<160 && e.touches[0].pageY/window.scale<100);
@@ -115,8 +115,9 @@
         onTouchMove(e) {
             if (this.touching) {
                 e.preventDefault();
-                this.touchX = e.touches[0].pageX - this.canvas2.getBoundingClientRect().x;
-                this.touchY = e.touches[0].pageY - this.canvas2.getBoundingClientRect().y;
+				// window.keysBeingPressed[' '] = false;
+                this.touchX = e.touches[0].clientX - this.canvas2.getBoundingClientRect().x;
+                this.touchY = e.touches[0].clientY - this.canvas2.getBoundingClientRect().y;
 				this.touchX /= window.scale;
 				this.touchY /= window.scale;
 				var x = this.touchX - window.width/2;
@@ -212,7 +213,7 @@
 				// this.ctx2.drawImage(this.bmp_touchUI, 0, 0, 320, 240, 0, 0, 320, 240);
 				this.ctx2.drawImage(this.bmp_touchUI, 0, 0, 32, 32, 32, 8, 32, 32); //esc button
 				this.ctx2.drawImage(this.bmp_touchUI, 0, 72, 32, 32, 32, 200, 32, 32); //z button
-				this.ctx2.drawImage(this.bmp_touchUI, 88, 0, 196, 196, 60, 20, 196, 196); //tan circle
+				this.ctx2.drawImage(this.bmp_touchUI, 88, 0, 196, 196, 61, 21, 196, 196); //tan circle
 				for(let i=0; i<8; i++){ //compass rose
 					var x=160+90*Math.cos(i*2*Math.PI/8);
 					var y=120-90*Math.sin(i*2*Math.PI/8);
@@ -220,9 +221,10 @@
 					this.ctx2.drawImage(this.bmp_touchUI, 0, i%2?65:56, size, size, ~~(x-size/2), ~~(y-size/2), size, size);
 				}
 				if(this.game.gameState!='playing'){
-					this.ctx2.drawImage(this.bmp_touchUI, 32, 0, 56, 56, 130, 92, 56, 56); //space button
+					this.ctx2.drawImage(this.bmp_touchUI, 32, 0, 56, 56, 132, 92, 56, 56); //space button
 				}
 				if(this.game.gameState=='playing'){
+					this.ctx2.drawImage(this.bmp_touchUI, 9, 56, 5, 5, 158, 117, 5, 5); //compass centre dot
 					this.UIhead_x = 1*window.keysBeingPressed['ArrowRight'] + -1*window.keysBeingPressed['ArrowLeft'];
 					this.UIhead_y = 1*window.keysBeingPressed['ArrowUp'] + -1*window.keysBeingPressed['ArrowDown'];
 					this.UIhead_x *= 90/(this.UIhead_x&&this.UIhead_y?2**0.5:1);
