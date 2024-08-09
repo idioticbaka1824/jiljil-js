@@ -232,7 +232,7 @@
 					
 					//playerTail-pawPrint
 					if(!this.debugInvulnerability && ui.frameCount>this.respiteFrames){
-						if((abs(this.playerSegPos[6].x-this.paw0Pos.x)<24/2 && abs(this.playerSegPos[6].y-this.paw0Pos.y)<24/2) || (abs(this.playerSegPos[6].x-this.paw1Pos.x)<24/2 && abs(this.playerSegPos[6].y-this.paw1Pos.y)<24/2)){
+						if((abs(this.playerSegPos[6].x-this.paw0Pos.x)<28/2 && abs(this.playerSegPos[6].y-this.paw0Pos.y)<28/2) || (abs(this.playerSegPos[6].x-this.paw1Pos.x)<28/2 && abs(this.playerSegPos[6].y-this.paw1Pos.y)<28/2)){
 							ui.se[5].play();
 							if(this.score > this.highscore){this.highscore = this.score;}
 							this.gameState = 'gameover';
