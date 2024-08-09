@@ -39,13 +39,13 @@
 			this.score = 0;
 			this.highscore = 0;
 			
-			this.justStartedPlaying = true;
+			this.justStartedPlaying = true; //for the 'are you ready' sound effect
 			
 			this.playerPos = {x:window.width/2, y:window.height-20-16/2};
 			this.playerVel = {x:0, y:0};
 			this.playerAcc = {x:0, y:0};
-			this.playerMaxVel = 2;
-			this.playerMaxAcc = 1;
+			// this.playerMaxVel = 2;
+			// this.playerMaxAcc = 1;
 			this.playerMass = 2.2;
 			this.player_dt = 0.05;
 			this.playerCurPos = {x:window.width/2, y:window.height-20-16/2};
@@ -78,13 +78,14 @@
 			
 			this.paw0Pos = {x:146, y:211};
 			this.paw1Pos = {x:186, y:216};
-			this.pawPeriod = 16; //in frames
-			this.respiteFrames = 64;
+			this.pawPeriod = 16; //# of frames between pawprint movements
+			this.respiteFrames = 64; //# of frames at beginning during initial upward movement where damage is not taken
 			
-			this.friction = 0.05; //applies to player
+			// this.friction = 0.05; //applies to player //didn't end up using this
 			this.gravity = 3; //applies to lemon
 			// this.corLP = 0.5; //coefficient of restitution, applies to lemon-player interaction //didn't end up using this
-			this.corLW = 0.97; //coefficient of restitution, applies to lemon-wall interaction
+			this.corLW = 0.97; //coeff. of rest. (lemon-wall)
+			this.corPW = 0.9; //coeff. of restt. (player-wall)
 			this.collisionShock = 6; //frames after a collision where player is sent recoiling and is not in control
 			this.lastCollision = -100; //frame # of last collision of player with wall/lemon
 			this.lemonIdleTime = 0; //if the lemon is sitting at the bottom for too long gotta perk it back up on its own at some point
@@ -110,7 +111,7 @@
 			this.paw0Pos = {x:146, y:211};
 			this.paw1Pos = {x:186, y:216};
 			ui.frameCount = 0;
-			this.lastCollision = -100;
+			this.lastCollision = -100; //setting to 0 means the player's initialised position is treated as a collision, which causes problems
 			this.lemonIdleTime = 0;
 		}
 		
@@ -147,7 +148,7 @@
 						// this.playerVel.x = clamp(this.playerVel.x, -this.playerMaxVel, this.playerMaxVel);
 						// this.playerVel.x += this.playerAcc.x - this.friction*Math.sign(this.playerVel.x);
 						// this.playerPos.x += this.playerVel.x;
-					//A virtual 'cursor' controls the ultimate position of the player's head, which takes some time to catch up. Modeled as a critically damped oscillator.
+					//A virtual 'cursor' controls the ultimate position of the player's head, which takes some time to catch up. Modeled as a critically damped harmonic oscillator.
 					if(ui.frameCount-this.lastCollision > this.collisionShock){this.playerCurVel.x = this.playerCurBaseVel*this.keyHasBeenPressed.horizontal;}
 					this.playerCurPos.x += this.player_dt*this.playerCurVel.x;
 					this.playerAcc.x = -(this.player_w0**2)*(this.playerPos.x - this.playerCurPos.x) + -2*this.player_w0*(this.playerVel.x);
@@ -189,13 +190,14 @@
 					this.keyHasBeenPressed = {horizontal:0, vertical:0};
 					
 					//lemon bouncing
-					if(this.lemonPos.y > 220-60/2){this.lemonIdleTime += 1;}
-					if(this.lemonIdleTime > window.fps*10){this.lemonVel.y=-100;this.lemonIdleTime=0;}
+					if(this.lemonPos.y > 220-64/2){this.lemonIdleTime += 1;}
+					if(this.lemonIdleTime > window.fps*8){this.lemonVel.y=-114;this.lemonIdleTime=0;}
 					this.lemonPos.x += this.lemon_dt*this.lemonVel.x;
 					this.lemonVel.y += this.gravity; //in computers, +y is downward
 					this.lemonPos.y += this.lemon_dt*this.lemonVel.y;
 					
 					//pawprint movement
+					//still not sure of the mechanics of this
 					if(ui.frameCount>this.respiteFrames){//they're inactive for a bit at the beginning
 						if(ui.frameCount % this.pawPeriod == 0){
 							switch((ui.frameCount/this.pawPeriod)%4){
@@ -227,7 +229,7 @@
 					//collisions
 					
 					//playerTail-pawPrint
-					if(false && ui.frameCount>this.respiteFrames){
+					if(ui.frameCount>this.respiteFrames){
 						if((abs(this.playerSegPos[6].x-this.paw0Pos.x)<32/2 && abs(this.playerSegPos[6].y-this.paw0Pos.y)<32/2) || (abs(this.playerSegPos[6].x-this.paw1Pos.x)<32/2 && abs(this.playerSegPos[6].y-this.paw1Pos.y)<32/2)){
 							ui.se[5].play();
 							if(this.score > this.highscore){this.highscore = this.score;}
@@ -244,15 +246,17 @@
 						// this.playerCurPos.y = clamp(this.playerCurPos.y, 20, window.height-20);
 					// }
 					if((this.playerPos.x < 20+16/2 && this.playerVel.x<0) || (this.playerPos.x > window.width-20-16/2 && this.playerVel.x>0)){
-						this.playerVel.x *= -2;
-						this.playerVel.x += 2*(this.playerVel.x ? this.playerVel.x < 0 ? -1 : 1 : 0) //stuff in brackets is signum function. basically add a bit to the velocity so that if it's nearly zero, there should still be some bounce
+						this.lastCollision = structuredClone(ui.frameCount);
+						this.playerVel.x *= -1*this.corPW;
+						this.playerCurVel.x = this.playerVel.x;
 						this.playerPos.x = clamp(this.playerPos.x, 20+16/2, window.width-20-16/2);
 						this.playerCurPos.x = clamp(this.playerPos.x, 20+16/2, window.width-20-16/2);
 						ui.se[3].play();
 					}
 					if((this.playerPos.y < 20+16/2 && this.playerVel.y<0) || (this.playerPos.y > window.height-20-16/2 && this.playerVel.y>0)){
-						this.playerVel.y *= -2;
-						this.playerVel.y += 2*(this.playerVel.y ? this.playerVel.y < 0 ? -1 : 1 : 0)
+						this.lastCollision = structuredClone(ui.frameCount);
+						this.playerVel.y *= -1*this.corPW;
+						this.playerCurVel.y = this.playerVel.y;
 						this.playerPos.y = clamp(this.playerPos.y, 20+16/2, window.height-20-16/2);
 						this.playerCurPos.y = clamp(this.playerPos.y, 20+16/2, window.height-20-16/2);
 						ui.se[3].play();
@@ -411,7 +415,6 @@
 				
 				case 'escmenu':
 					if(ekeys['f']){
-						// ui.drawString(104,28,'F', 5);
 						window.audioContext.resume();
 						this.gameState = this.previousGameState;
 					}
