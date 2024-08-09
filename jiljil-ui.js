@@ -103,7 +103,7 @@
 			var y = -this.touchY + window.height/2;
 			var r = dist2(x,y);
 			window.keysBeingPressed[' '] = (r<40);
-			window.keysBeingPressed['Escape'] = (this.touchX>32 && this.touchX<32+32 && this.touchY>8 && this.touchY<8+32);
+			window.keysBeingPressed['Escape'] = (this.touchX>32-5 && this.touchX<32+32+5 && this.touchY>8-5 && this.touchY<8+32+5); //\pm 5 grace pixels for fat fingering
 			window.keysBeingPressed['f'] = (e.touches[0].pageX>80 && e.touches[0].pageX<160 && e.touches[0].pageY<100);
 			window.keysBeingPressed['g'] = (e.touches[0].pageX>160 && e.touches[0].pageX<240 && e.touches[0].pageY<100);
 			window.keysBeingPressed['h'] = (e.touches[0].pageX>240 && e.touches[0].pageY<100);
@@ -118,14 +118,11 @@
 				var y = -this.touchY + window.height/2;
 				var r = dist2(x,y);
 				var theta = Math.atan2(y,x);
-				console.log(theta*180/Math.PI);
-				// console.log(e.touches[0].pageX, e.touches[0].pageY);
-				// console.log(this.touchX, this.touchY);
-				window.keysBeingPressed['ArrowRight'] = (abs(theta-0)<2*Math.PI/4);
-				window.keysBeingPressed['ArrowUp'] = (abs(theta-Math.PI/2)<2*Math.PI/4);
-				window.keysBeingPressed['ArrowLeft'] = ((abs(theta-Math.PI)<2*Math.PI/4) || (abs(theta - -Math.PI)<2*Math.PI/4)); //branch cut at \pm\pi
-				window.keysBeingPressed['ArrowDown'] = (abs(theta - -Math.PI/2)<2*Math.PI/4);
-				// console.log(theta, window.keysBeingPressed);
+				// console.log(theta*180/Math.PI);
+				window.keysBeingPressed['ArrowRight'] = (abs(theta-0)<2*Math.PI*1.5/8);
+				window.keysBeingPressed['ArrowUp'] = (abs(theta-Math.PI/2)<2*Math.PI*1.5/8);
+				window.keysBeingPressed['ArrowLeft'] = ((abs(theta-Math.PI)<2*Math.PI*1.5/8) || (abs(theta - -Math.PI)<2*Math.PI*1.5/8)); //branch cut at \pm\pi
+				window.keysBeingPressed['ArrowDown'] = (abs(theta - -Math.PI/2)<2*Math.PI*1.5/8);
             }
         }
 
@@ -208,9 +205,38 @@
 					this.ctx2.drawImage(this.bmp_jiljil, 64, 64, 20, 20, 320-20, i*20, 20, 20); //left wall
 				}
 				// this.ctx2.drawImage(this.bmp_touchUI, 0, 0, 320, 240, 0, 0, 320, 240);
-				this.ctx2.drawImage(this.bmp_touchUI, 0, 0, 32, 32, 32, 8, 32, 32);
-				this.ctx2.drawImage(this.bmp_touchUI, 32, 0, 56, 56, 130, 92, 56, 56);
-				this.ctx2.drawImage(this.bmp_touchUI, 88, 0, 196, 196, 60, 20, 196, 196);
+				this.ctx2.drawImage(this.bmp_touchUI, 0, 0, 32, 32, 32, 8, 32, 32); //esc button
+				this.ctx2.drawImage(this.bmp_touchUI, 88, 0, 196, 196, 60, 20, 196, 196); //tan circle
+				for(let i=0; i<8; i++){ //compass rose
+					var x=160+90*Math.cos(i*2*Math.PI/8);
+					var y=120-90*Math.sin(i*2*Math.PI/8);
+					var size=i%2?6:9;
+					this.ctx2.drawImage(this.bmp_touchUI, 0, i%2?65:56, size, size, ~~(x-size/2), ~~(y-size/2), size, size);
+				}
+				if(this.game.gameState!='playing'){
+					this.ctx2.drawImage(this.bmp_touchUI, 32, 0, 56, 56, 130, 92, 56, 56); //space button
+				}
+				if(this.game.gameState=='playing'){
+					this.UIhead_x = 1*window.keysBeingPressed['ArrowRight'] + -1*window.keysBeingPressed['ArrowLeft'];
+					this.UIhead_y = 1*window.keysBeingPressed['ArrowUp'] + -1*window.keysBeingPressed['ArrowDown'];
+					this.UIhead_x *= 90/(this.UIhead_x&&this.UIhead_y?2**0.5:1);
+					this.UIhead_y *= 90/(this.UIhead_x&&this.UIhead_y?2**0.5:1);
+					this.UIhead_x = 160+this.UIhead_x-16/2;
+					this.UIhead_y = 120-this.UIhead_y-16/2;
+					// if(window.keysBeingPressed['ArrowRight']||window.keysBeingPressed['ArrowUp']||window.keysBeingPressed['ArrowLeft']||window.keysBeingPressed['ArrowDown']){
+						this.ctx2.drawImage(this.bmp_jiljil, 0, 0, 16, 16, this.UIhead_x, this.UIhead_y, 16, 16);
+					// }
+				}
+				if(this.game.gameState=='gameover'){
+					// if(!(window.keysBeingPressed['ArrowRight']||window.keysBeingPressed['ArrowUp']||window.keysBeingPressed['ArrowLeft']||window.keysBeingPressed['ArrowDown'])){
+						// this.UIhead_x = 160-16/2;
+						// this.UIhead_y = 120-16/2;
+					// }
+					if(this.UIhead_x==160-16/2 && this.UIhead_y==120-16/2){
+						this.UIhead_y -= 16;
+					}
+					this.ctx2.drawImage(this.bmp_jiljil, 64, 16, 16, 16, this.UIhead_x, this.UIhead_y, 16, 16);
+				}
 					
 			}
 			

@@ -56,12 +56,12 @@
 				touchCanvas.id = 'touch-canvas';
 				touchCanvas.width = scale*width;
 				touchCanvas.height = scale*height;
+				touchCanvas.style.imageRendering = 'pixelated';
 				<!-- touchCanvas.style.borderStyle = 'solid'; -->
 				<!-- touchCanvas.style.borderWidth = '1px'; -->
 				canvasContainer.appendChild(touchCanvas);
 			}
 			const touchCanvas = document.getElementById('touch-canvas');
-				touchCanvas.style.imageRendering = 'pixelated';
             const ui = new GameUI(gameCanvas, touchCanvas);
 			const game = new Game();
 			ui.setGame(game);
