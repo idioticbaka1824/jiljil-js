@@ -83,11 +83,11 @@
 			
 			// this.friction = 0.05; //applies to player //didn't end up using this
 			this.gravity = 3; //applies to lemon
-			// this.corLP = 0.5; //coefficient of restitution, applies to lemon-player interaction //didn't end up using this
+			this.corLP = 1.1; //coefficient of restitution, applies to lemon-player interaction. energy appears to be created in these collisions
 			this.corLW = 0.97; //coeff. of rest. (lemon-wall)
 			this.corPW = 0.9; //coeff. of restt. (player-wall)
 			this.collisionShock = 6; //frames after a collision where player is sent recoiling and is not in control
-			this.lastCollision = -100; //frame # of last collision of player with wall/lemon
+			this.lastCollision = -100; //frame # of last collision of player with wall/lemon. setting to 0 means the player's initialised position is treated as a collision, which causes problems
 			this.lemonIdleTime = 0; //if the lemon is sitting at the bottom for too long gotta perk it back up on its own at some point
         
 			this.debugInvulnerability = false;
@@ -113,7 +113,7 @@
 			this.paw0Pos = {x:146, y:211};
 			this.paw1Pos = {x:186, y:216};
 			ui.frameCount = 0;
-			this.lastCollision = -100; //setting to 0 means the player's initialised position is treated as a collision, which causes problems
+			this.lastCollision = -100;
 			this.lemonIdleTime = 0;
 		}
 		
@@ -300,10 +300,10 @@
 						const u2h_x = dot(u2.x, u2.y, dx, dy)*dx;
 						const u2h_y = dot(u2.x, u2.y, dx, dy)*dy;
 						
-						const v1h_x = k1*u1h_x + k3*u2h_x;
-						const v1h_y = k1*u1h_y + k3*u2h_y;
-						const v2h_x = k2*u1h_x - k1*u2h_x;
-						const v2h_y = k2*u1h_y - k1*u2h_y;
+						const v1h_x = this.corLP*(k1*u1h_x + k3*u2h_x);
+						const v1h_y = this.corLP*(k1*u1h_y + k3*u2h_y);
+						const v2h_x = this.corLP*(k2*u1h_x - k1*u2h_x);
+						const v2h_y = this.corLP*(k2*u1h_y - k1*u2h_y);
 						
 						const v1g_x = u1.x-u1h_x; //g for glancing
 						const v1g_y = u1.y-u1h_y;
