@@ -3,7 +3,6 @@
 		this.drawImage(my_image, Math.round(sx), Math.round(sy), Math.round(sWidth), Math.round(sHeight), Math.round(dx), Math.round(dy), Math.round(dWidth), Math.round(dHeight))
 	} //there were some glitches in the image rendering around the edges that was apparently caused by subpixel rendering, this fixes that
 	
-	
 	//mod function
 	function abs(x){
 		return x>0 ? x : -1*x;
@@ -100,6 +99,7 @@
 		}
 		
         onTouchStart(e) {
+			this.hasSinceUpdated = false;
             this.touching = true;
             this.touchX = e.touches[0].clientX - this.canvas2.getBoundingClientRect().x;
             this.touchY = e.touches[0].clientY - this.canvas2.getBoundingClientRect().y;
@@ -140,17 +140,20 @@
             this.touching = false;
             this.touchX = 0;
             this.touchY = 0;
-			window.keysBeingPressed = {
-			'ArrowLeft': false,
-			'ArrowRight': false,
-			'ArrowUp': false,
-			'ArrowDown': false,
-			'Escape': false,
-			' ': false,
-			'f': false,
-			'g': false,
-			'k': false,
-			};
+			if(this.hasSinceUpdated){
+				window.keysBeingPressed = {
+				'ArrowLeft': false,
+				'ArrowRight': false,
+				'ArrowUp': false,
+				'ArrowDown': false,
+				'Escape': false,
+				' ': false,
+				'f': false,
+				'g': false,
+				'k': false,
+				};
+				this.hasSinceUpdated = false;
+			}
         }
         
 

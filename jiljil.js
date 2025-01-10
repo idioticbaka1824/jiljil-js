@@ -115,9 +115,23 @@
 			ui.frameCount = 0;
 			this.lastCollision = -100;
 			this.lemonIdleTime = 0;
+			
+			window.keysBeingPressed = {
+				'ArrowLeft': false,
+				'ArrowRight': false,
+				'ArrowUp': false,
+				'ArrowDown': false,
+				'Escape': false,
+				' ': false,
+				'f': false,
+				'g': false,
+				'k': false,
+			};
 		}
 		
         update() {
+			
+			ui.hasSinceUpdated = true;
 			
 			this.keyHandling(window.keysBeingPressed);
 			
