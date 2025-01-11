@@ -38,6 +38,7 @@
 			
 			this.score = 0;
 			this.highscore = 0;
+			if (typeof(Storage) !== "undefined") {this.highscore = localStorage.getItem('highscore');}
 			
 			this.justStartedPlaying = true; //for the 'are you ready' sound effect
 			
@@ -248,7 +249,10 @@
 					if(!this.debugInvulnerability && ui.frameCount>this.respiteFrames){
 						if((abs(this.playerSegPos[6].x-this.paw0Pos.x)<28/2 && abs(this.playerSegPos[6].y-this.paw0Pos.y)<28/2) || (abs(this.playerSegPos[6].x-this.paw1Pos.x)<28/2 && abs(this.playerSegPos[6].y-this.paw1Pos.y)<28/2)){
 							ui.se[5].play();
-							if(this.score > this.highscore){this.highscore = this.score;}
+							if(this.score > this.highscore){
+								this.highscore = this.score;
+								if (typeof(Storage) !== "undefined") {localStorage.setItem('highscore', this.highscore);}
+								}
 							this.gameState = 'gameover';
 							this.previousGameState = 'gameover';
 						}
