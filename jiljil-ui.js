@@ -151,6 +151,7 @@
 				'f': false,
 				'g': false,
 				'k': false,
+				'z': false,
 				};
 				this.hasSinceUpdated = false;
 			}
