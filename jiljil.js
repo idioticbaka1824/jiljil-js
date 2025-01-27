@@ -57,7 +57,7 @@
 			this.playerSeg_zeta = 0.5; //the segments are a bit underdamped
 			this.playerSeg_w0 = 5.5; //wonder if these parameters need to be unique to each segment
 			this.sparkle_dt = 0.05;
-			this.sparkle_w0 = 1;
+			this.sparkle_w0 = 1.3;
 			this.playerSegSize = [13, 12, 11, 10, 9, 8, 16];
 			this.playerSegPos = [];
 			this.playerSegVel = [];
@@ -85,8 +85,8 @@
 			// this.friction = 0.05; //applies to player //didn't end up using this
 			this.gravity = 3; //applies to lemon
 			this.corLP = 1.1; //coefficient of restitution, applies to lemon-player interaction. energy appears to be created in these collisions
-			this.corLW = 0.97; //coeff. of rest. (lemon-wall)
-			this.corPW = 0.9; //coeff. of restt. (player-wall)
+			this.corLW = 0.97; //coeff. of restt. (lemon-wall)
+			this.corPW = 1.2; //coeff. of restt. (player-wall)
 			this.collisionShock = 6; //frames after a collision where player is sent recoiling and is not in control
 			this.lastCollision = -100; //frame # of last collision of player with wall/lemon. setting to 0 means the player's initialised position is treated as a collision, which causes problems
 			this.lemonIdleTime = 0; //if the lemon is sitting at the bottom for too long gotta perk it back up on its own at some point
