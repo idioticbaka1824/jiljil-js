@@ -55,17 +55,17 @@
 			
 			this.frameCount = 0;
 			
-			this.bgm1_url = new URL('https://raadshaikh.github.io/jiljil-js/WAVE/BGM1.wav');
+			this.bgm1_url = new URL('https://idioticbaka1824.github.io/jiljil-js/WAVE/BGM1.wav');
 			this.bgm1 = new Audio(this.bgm1_url);
 			this.bgm1.crossOrigin = "anonymous";
 			this.bgm1_playing = false;
-			this.bgm2_url = new URL('https://raadshaikh.github.io/jiljil-js/WAVE/BGM2.wav');
+			this.bgm2_url = new URL('https://idioticbaka1824.github.io/jiljil-js/WAVE/BGM2.wav');
 			this.bgm2 = new Audio(this.bgm2_url);
 			this.bgm2.crossOrigin = "anonymous";
 			this.bgm2_playing = false;
 			this.se = [];
 			for(let i=0; i<=11; i++){
-				this.se[i] = new Audio(new URL('https://raadshaikh.github.io/jiljil-js/WAVE/SE'+String(i+1).padStart(2,'0')+'.wav'))
+				this.se[i] = new Audio(new URL('https://idioticbaka1824.github.io/jiljil-js/WAVE/SE'+String(i+1).padStart(2,'0')+'.wav'))
 			}
 			
 			window.audioContext = new AudioContext();
