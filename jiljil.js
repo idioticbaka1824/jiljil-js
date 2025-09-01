@@ -165,7 +165,7 @@
 						// this.playerVel.x = clamp(this.playerVel.x, -this.playerMaxVel, this.playerMaxVel);
 						// this.playerVel.x += this.playerAcc.x - this.friction*Math.sign(this.playerVel.x);
 						// this.playerPos.x += this.playerVel.x;
-					//A virtual 'cursor' controls the ultimate position of the player's head, which takes some time to catch up. Modeled as a critically damped harmonic oscillator.
+					//A virtual 'cursor' controls the ultimate position of the player's head, which in turn takes some time to catch up. Modeled as a critically damped harmonic oscillator.
 					if(ui.frameCount-this.lastCollision > this.collisionShock){this.playerCurVel.x = this.playerCurBaseVel*this.keyHasBeenPressed.horizontal;}
 					this.playerCurPos.x += this.player_dt*this.playerCurVel.x;
 					this.playerAcc.x = -(this.player_w0**2)*(this.playerPos.x - this.playerCurPos.x) + -2*this.player_w0*(this.playerVel.x);
@@ -235,6 +235,8 @@
 								case 3:
 									this.paw1Pos.x = this.sparklePosPrev.x;
 									this.paw1Pos.y = this.sparklePosPrev.y;
+									// this.paw1Pos.x = (this.sparklePos.x+this.paw0Pos.x)/2;
+									// this.paw1Pos.y = (this.sparklePos.y+this.paw0Pos.y)/2;
 									break;
 								default:
 									break;
